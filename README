@@ -1,0 +1,11 @@
+Raspberry Pi library for GPIO, 1-Wire, System Time Counter (STC) access. As an
+example of usage there have has provided API for handling various popular sensors
+like Dallas DS family of temperature sensors, HC-SR04 distance sensor, PISO shift
+register.
+
+Expect more detailed documentation and sensors support in the future. For now
+look for examples in /examples directory.
+
+License
+-------
+2 clause BSD license. See LICENSE file for details.
