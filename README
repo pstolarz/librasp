@@ -1,5 +1,5 @@
 Raspberry Pi library for GPIO, 1-Wire, System Time Counter (STC) access. As an
-example of usage there have has provided API for handling various popular sensors
+example of usage there has been provided API for handling various popular sensors
 like Dallas DS family of temperature sensors, HC-SR04 distance sensor, PISO shift
 register.
 
