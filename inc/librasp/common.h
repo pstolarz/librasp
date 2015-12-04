@@ -55,7 +55,9 @@ typedef enum _lr_errc_t
     LREC_DEV_ERR,       /* device error */
     LREC_NO_DEV,        /* no device found */
     LREC_DTA_CRPT,      /* data corrupted/CRC error */
-    LREC_CLK_ERR        /* system clock related error */
+    LREC_CLK_ERR,       /* system clock related error */
+    LREC_OPEN_ERR,      /* file descriptor open error */
+    LREC_IOCTL_ERR      /* ioctl() error */
 } lr_errc_t;
 
 typedef enum _lr_loglev_t
