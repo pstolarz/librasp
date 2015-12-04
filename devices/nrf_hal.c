@@ -33,7 +33,9 @@
 
 static spi_hndl_t spi_hndl = {-1};
 
-#define SET_SPI_ERR(cmd) (errno = ((cmd)==LREC_SUCCESS ? 0 : ECOMM))
+#define SET_SPI_ERR(cmd) \
+    (errno = ((spi_hndl.fd!=-1) && (cmd)==LREC_SUCCESS ? 0 : ECOMM))
+
 #define CHK_SPI_ERR() if (errno==ECOMM) goto finish;
 
 static uint8_t hal_nrf_read_reg(uint8_t reg);
@@ -45,20 +47,16 @@ static void hal_nrf_write_multibyte_reg(
 /* Exported functions go below; see header for details
  */
 
-bool hal_nrf_init(int spi_dev_no, int spi_cs_no)
+bool hal_nrf_set_spi_hndl(spi_hndl_t *p_hndl)
 {
-    errno = 0;
-    hal_nrf_free();
-
-    return (spi_init(&spi_hndl, spi_dev_no, spi_cs_no,
-        SPI_USE_DEF, SPI_USE_DEF, SPI_USE_DEF, SPI_USE_DEF,
-        SPI_USE_DEF, SPI_USE_DEF)==LREC_SUCCESS);
-}
-
-void hal_nrf_free()
-{
-    if (spi_hndl.fd!=-1) spi_free(&spi_hndl);
-    spi_hndl.fd = -1;
+    if (p_hndl && p_hndl->fd!=-1 && p_hndl->mode==SPI_MODE_0 &&
+        !p_hndl->lsb_first && p_hndl->bits_per_word==8)
+    {
+        /* deep copy of the handle */
+        spi_hndl = *p_hndl;
+        return true;
+    } else
+        return false;
 }
 
 void hal_nrf_set_operation_mode(hal_nrf_operation_mode_t op_mode)

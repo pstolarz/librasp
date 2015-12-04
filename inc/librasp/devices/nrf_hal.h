@@ -21,6 +21,20 @@
  */
 
 /**
+ * This is basically nRFgo SDK's NRF HAL API ported to work with librasp library.
+ *
+ * The unavoidable differences are:
+ * 1. Addition of hal_nrf_set_spi_hndl() function, which need to be called at
+ *    first (before any other NRF HALL API call) to set the SPI communication
+ *    channel with the nRF24L01+ transceiver.
+ * 2. Since the original NRF HAL API assumed successful SPI communication with
+ *    the transceiver, this implementation uses "errno approach" to inform an
+ *    API caller about possible problems with the SPI communication. The caller
+ *    should check the errno value against ECOMM after any API call to detect
+ *    the SPI communication issues.
+ */
+
+/**
  * This is the nRF24L01+ transceiver used in several Nordic Semiconductor devices.
  * The transceiver is set up and controlled via an internal SPI interface on
  * the chip. The HAL for the radio transceiver hides this SPI interface from
@@ -246,20 +260,21 @@ typedef enum {
 /* Setup function prototypes */
 
 /**
- * Initialize NRF HAL module.
- * The function must be called at first before using any other API from the HAL.
- * @param spi_dev_no SPI master device number (0-based).
- * @param spi_cs_no SPI slave device number (0-based).
- * @return TRUE on success, FALSE otherwise
+ * Initialize NRF HAL module with SPI handle used for communication with
+ * the transceiver. The function MUST be called before any subsequent NRF HAL
+ * API calls. The SPI handle must be initialized in MODE0 (CPOL=0, CPHA=0) with
+ * MSB transmitted first and 8-bit length word otherwise the error will
+ * be reported (function will return FALSE).
+ *
+ * NOTE: For a single transceiver (the most common case) connected to a board
+ * the function is called once with a SPI handle initiated for communication
+ * with the transceiver. If more than one transceiver is connected to a board
+ * and there is a need to handle them via the NRF HAL API from the same process,
+ * a caller need to set proper SPI handle (associated with the transceiver)
+ * before API calls devoted for a specific transceiver. In this case any thread
+ * synchronization issues should be resolved by the caller.
  */
-bool hal_nrf_init(int spi_dev_no, int spi_cs_no);
-
-/**
- * Free NRF HAL module.
- * The function frees SPI communication resources therefore any subsequent HAL
- * API calls must not be performed.
- */
-void hal_nrf_free();
+bool hal_nrf_set_spi_hndl(spi_hndl_t *p_hndl);
 
 /**
  * Enable or disable interrupt for radio. Use this function to enable or disable
