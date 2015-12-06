@@ -23,15 +23,16 @@
 /**
  * This is basically nRFgo SDK's NRF HAL API ported to work with librasp library.
  *
- * The unavoidable differences are:
+ * The differences are:
  * 1. Addition of hal_nrf_set_spi_hndl() function, which need to be called at
  *    first (before any other NRF HALL API call) to set the SPI communication
  *    channel with the nRF24L01+ transceiver.
  * 2. Since the original NRF HAL API assumed successful SPI communication with
  *    the transceiver, this implementation uses "errno approach" to inform an
- *    API caller about possible problems with the SPI communication. The caller
+ *    API caller about possible problems with the SPI communication. A caller
  *    should check the errno value against ECOMM after any API call to detect
- *    the SPI communication issues.
+ *    SPI communication issues.
+ * 3. Added new functions, mostly getters for already existing setters.
  */
 
 /**
@@ -63,6 +64,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "librasp/spi.h"
+
+/* max payload size */
+#define NRF_MAX_PL         32
 
 /* nRF24L01 register details
  */
@@ -257,7 +261,8 @@ typedef enum {
     HAL_NRF_AW_5BYTES           /* Set address width to 5 bytes */
 } hal_nrf_address_width_t;
 
-/* Setup function prototypes */
+/* Setup function prototypes
+ */
 
 /**
  * Initialize NRF HAL module with SPI handle used for communication with
@@ -279,11 +284,16 @@ bool hal_nrf_set_spi_hndl(spi_hndl_t *p_hndl);
 /**
  * Enable or disable interrupt for radio. Use this function to enable or disable
  * one of the interrupt sources for the radio. This function only changes state
- * for selected int_type, the rest of the interrupt sources are left unchanged.
+ * for selected int_source, the rest of the interrupt sources are left unchanged.
  * @param int_source Radio interrupt Source.
  * @param irq_state Enable or Disable.
  */
 void hal_nrf_set_irq_mode(hal_nrf_irq_source_t int_source, bool irq_state);
+
+/**
+ * Get interrupt mode (enabled or disabled) for a given int_source.
+ */
+bool hal_nrf_get_irq_mode(hal_nrf_irq_source_t int_source);
 
 /* For the obsolete nRF24L01 it is necessary to issue an activate command before
  * the features enabled by the FEATURE register can be used. For nRF24L01+ these
@@ -298,16 +308,31 @@ void hal_nrf_activate_features(void);
 void hal_nrf_enable_dynamic_payload(bool enable);
 
 /**
+ * Check if dynamic packet length feature is enabled.
+ */
+bool hal_nrf_is_dynamic_payload_enabled(void);
+
+/**
  * Enables the ACK payload feature
  * @param enable Whether to enable or disable ACK payload
  */
 void hal_nrf_enable_ack_payload(bool enable);
 
 /**
+ * Check if ACK payload feature is enabled.
+ */
+bool hal_nrf_is_ack_payload_enabled(void);
+
+/**
  * Enables the dynamic ack feature
- * @param enable Whether to enable or disable Dynamic ACK
+ * @param enable Whether to enable or disable dynamic ack
  */
 void hal_nrf_enable_dynamic_ack(bool enable);
+
+/**
+ * Check if dynamic ack feature is enabled.
+ */
+bool hal_nrf_is_dynamic_ack_enabled(void);
 
 /**
  * Function for enabling dynmic payload size.
@@ -357,11 +382,16 @@ uint8_t hal_nrf_clear_irq_flags_get_status(void);
 void hal_nrf_clear_irq_flag(hal_nrf_irq_source_t int_source);
 
 /**
- * Set the CRC mode used by the radio.
- * Use this function to set the CRC mode; CRC disabled, 1 or 2 bytes.
+ * Set CRC mode used by the radio.
+ * Use this function to set CRC mode: CRC disabled, 1 or 2 bytes.
  * @param crc_mode CRC mode to use
  */
 void hal_nrf_set_crc_mode(hal_nrf_crc_mode_t crc_mode);
+
+/**
+ * Get CRC mode used by the radio.
+ */
+hal_nrf_crc_mode_t hal_nrf_get_crc_mode(void);
 
 /**
  * Open radio pipe(s) and enable/ disable auto acknowledge.
@@ -397,17 +427,25 @@ void hal_nrf_set_address(const hal_nrf_address_t address, const uint8_t *addr);
  * in the<BR> *addr buffer.
  * @return Numbers of bytes copied to addr
  */
-uint8_t hal_nrf_get_address (uint8_t address, uint8_t *addr);
+uint8_t hal_nrf_get_address(uint8_t address, uint8_t *addr);
 
 /**
  * Set auto acknowledge parameters.
- * Use this function to set retransmit and retransmit delay
- * parameters.
- *
- * @param retr Number of retransmit, 0 equ retransmit OFF
+ * Use this function to set retransmit and retransmit delay parameters.
+ * @param retr Number of retransmits, 0 equ retransmit OFF
  * @param delay Retransmit delay in usec (in range 250-4000 with step 250).
  */
 void hal_nrf_set_auto_retr(uint8_t retr, uint16_t delay);
+
+/**
+ * Get auto acknowledgment's number of retransmits.
+ */
+uint8_t hal_nrf_get_auto_retr_ctr(void);
+
+/**
+ * Get auto acknowledgment's delay (usec).
+ */
+uint16_t hal_nrf_get_auto_retr_delay(void);
 
 /**
  * Set radio's address width.
@@ -421,7 +459,7 @@ void hal_nrf_set_address_width(hal_nrf_address_width_t address_width);
  * Gets the radio's address width.
  * @return Address width
  */
-uint8_t hal_nrf_get_address_width (void);
+uint8_t hal_nrf_get_address_width(void);
 
 /**
  * Set payload width for selected pipe.
@@ -431,17 +469,6 @@ uint8_t hal_nrf_get_address_width (void);
  * @param pload_width number of bytes expected
  */
 void hal_nrf_set_rx_payload_width(uint8_t pipe_num, uint8_t pload_width);
-
-/**
- * Read current interrupt mode for selected interrupt source.
- * Use this function to get the interrupt source's mode,
- * either enabled or disabled.
- * @param int_source Interrupt source to get mode from
- * @return Interrupt Mode
- * @retval FALSE Interrupt disabled
- * @retval TRUE Interrupt enabled
- */
-bool hal_nrf_get_irq_mode(uint8_t int_source);
 
 /**
  * Read all interrupt flags.
@@ -492,15 +519,20 @@ uint8_t hal_nrf_get_packet_lost_ctr(void);
  */
 uint8_t hal_nrf_get_rx_payload_width(uint8_t pipe_num);
 
-/* Operation function prototypes */
+/* Operation function prototypes
+ */
 
 /**
  * Set radio's operation mode.
- * Use this function to enter PTX (primary TX)
- * or PRX (primary RX).
+ * Use this function to enter PTX (primary TX) or PRX (primary RX).
  * @param op_mode Operation mode
  */
 void hal_nrf_set_operation_mode(hal_nrf_operation_mode_t op_mode);
+
+/**
+ * Get radio's operation mode.
+ */
+hal_nrf_operation_mode_t hal_nrf_get_operation_mode(void);
 
 /**
  * Set radio's power mode.
@@ -510,11 +542,21 @@ void hal_nrf_set_operation_mode(hal_nrf_operation_mode_t op_mode);
 void hal_nrf_set_power_mode(hal_nrf_pwr_mode_t pwr_mode);
 
 /**
+ * Get radio's operation mode.
+ */
+hal_nrf_pwr_mode_t hal_nrf_get_power_mode(void);
+
+/**
  * Set radio's RF channel.
  * Use this function to select which RF channel to use.
  * @param channel RF channel
  */
 void hal_nrf_set_rf_channel(uint8_t channel);
+
+/**
+ * Get radio's RF channel.
+ */
+uint8_t hal_nrf_get_rf_channel(void);
 
 /**
  * Set radio's TX output power.
@@ -524,14 +566,24 @@ void hal_nrf_set_rf_channel(uint8_t channel);
 void hal_nrf_set_output_power(hal_nrf_output_power_t power);
 
 /**
+ * Get radio's TX output power.
+ */
+hal_nrf_output_power_t hal_nrf_get_output_power(void);
+
+/**
  * Set radio's on-air datarate.
  * Use this function to select radio's on-air datarate.
  * @param datarate On-air datarate
  */
 void hal_nrf_set_datarate(hal_nrf_datarate_t datarate);
 
+/**
+ * Get radio's on-air datarate.
+ */
+hal_nrf_datarate_t hal_nrf_get_datarate(void);
 
-/* Status functions prototypes */
+/* Status functions prototypes
+ */
 
 /**
  * Get radio's TX FIFO status.
@@ -574,6 +626,9 @@ bool hal_nrf_tx_fifo_full(void);
  */
 uint8_t hal_nrf_get_rx_fifo_status(void);
 
+/**
+ * Get FIFO_STATUS register.
+ */
 uint8_t hal_nrf_get_fifo_status(void);
 
 /**
@@ -614,7 +669,20 @@ uint8_t hal_nrf_get_transmit_attempts(void);
  */
 bool hal_nrf_get_carrier_detect(void);
 
-/* Data operation prototypes */
+/**
+ * Read transmitter register content.
+ * @param reg Register to read
+ * @return Register contents
+ */
+uint8_t hal_nrf_read_reg(uint8_t reg);
+
+/**
+ * RPD used for nRF24l01+
+ */
+#define hal_nrf_get_rcv_pwr_detector() hal_nrf_get_carrier_detect()
+
+/* Data operation prototypes
+ */
 
 /**
  * Get RX data source.
@@ -686,7 +754,10 @@ void hal_nrf_flush_tx(void);
  */
 uint8_t hal_nrf_nop(void);
 
-/* Test functions prototypes */
+#define hal_nrf_get_status() hal_nrf_nop()
+
+/* Test functions prototypes
+ */
 
 /**
  * Set radio's PLL mode.
@@ -696,27 +767,20 @@ uint8_t hal_nrf_nop(void);
 void hal_nrf_set_pll_mode(bool pll_lock);
 
 /**
- * Set radio's LNA gain mode.
- * Use this function to either use HI current or LOW current mode for the radio.
- * @param lna_gain LNA gain mode
+ * Get radio's PLL mode.
  */
-void hal_nrf_set_lna_gain(bool lna_gain);
+bool hal_nrf_get_pll_mode(void);
 
 /**
  * Enables continuous carrier transmit.
  * Use this function to enable or disable continuous carrier transmission.
  * @param enable Enable continuous carrier
  */
-void hal_nrf_enable_continious_wave (bool enable);
-
-/* hal_nrf_l01 basic functions, used by all the other functions */
+void hal_nrf_enable_continious_wave(bool enable);
 
 /**
- * Basis function, nrf_rw
- * This function is used by the basis functions to exchange data with the data.
- * @param value Databyte to write
- * @return Databyte from radio.
+ * Check if continuous carrier transmit is enabled.
  */
-uint8_t hal_nrf_rw(uint8_t value);
+bool hal_nrf_is_continious_wave_enabled(void);
 
 #endif /* __LR_DEVS_NRF_HAL_H__ */
