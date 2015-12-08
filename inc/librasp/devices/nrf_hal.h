@@ -410,6 +410,20 @@ void hal_nrf_open_pipe(hal_nrf_address_t pipe_num, bool auto_ack);
 void hal_nrf_close_pipe(hal_nrf_address_t pipe_num);
 
 /**
+ * Configures pipe for transmission by:
+ * 1. Enabling a pipe,
+ * 2. Setting its address,
+ * 3. Setting RX payload length.
+ * @param pipe_num Pipe to open
+ * @param auto_ack Auto_Ack ON/OFF
+ * @param addr Pipe address, if 0: don't change the address.
+ * @param pload_width RX payload length (or max. payload length in case if
+ * dynamic feature is enabled).
+ */
+void hal_nrf_cconfig_rx_pipe(hal_nrf_address_t pipe_num,
+    bool auto_ack, const uint8_t *addr, uint8_t pload_width);
+
+/**
  * Set radio's RX address and TX address.
  * Use this function to set a RX address, or to set the TX address.
  * Beware of the difference for single and multibyte address registers.

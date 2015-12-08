@@ -10,13 +10,19 @@
    See the License for more information.
  */
 
+/* GPIO input/output test.
+
+   Connect switch and LED to the GPIO_IN GPIO_OUT pins respectively. Press
+   switch and observe LED blinking
+ */
+
 #include <unistd.h>
 #include "librasp/gpio.h"
 
-#define GPIO_IN     4U
-#define GPIO_OUT    27U
+#define GPIO_IN     4
+#define GPIO_OUT    27
 
-#define STATES      6U
+#define STATES      6
 
 
 int main(int argc, char **argv)

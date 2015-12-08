@@ -15,6 +15,10 @@
 #include <sys/resource.h>
 #include "librasp/clock.h"
 
+/* Accuracy comparison between standard usleep() and STC implementation of the
+   function.
+ */
+
 int main(int argc, char **argv)
 {
     uint32_t start, stop;

@@ -14,6 +14,10 @@
 #include <unistd.h>
 #include "librasp/devices/hcsr04.h"
 
+/* HC SR04 distance sensor probe. Connect the sensors pins according to GPIO_TRIG
+   and GPIO_ECHO.
+ */
+
 #define GPIO_TRIG   4
 #define GPIO_ECHO   14
 

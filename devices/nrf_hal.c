@@ -309,6 +309,22 @@ finish:
     return;
 }
 
+void hal_nrf_cconfig_rx_pipe(hal_nrf_address_t pipe_num,
+    bool auto_ack, const uint8_t *addr, uint8_t pload_width)
+{
+    hal_nrf_open_pipe(pipe_num, auto_ack);
+    CHK_SPI_ERR();
+
+    if (addr) {
+        hal_nrf_set_address(pipe_num, addr);
+        CHK_SPI_ERR();
+    }
+
+    hal_nrf_set_rx_payload_width((uint8_t)pipe_num, pload_width);
+finish:
+    return;
+}
+
 uint8_t hal_nrf_get_pipe_status(uint8_t pipe_num)
 {
     uint8_t en_rxaddr, en_aa;

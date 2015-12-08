@@ -10,6 +10,9 @@
    See the License for more information.
  */
 
+/* Command line utility to probe DHT 11/22 temperature sensor.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

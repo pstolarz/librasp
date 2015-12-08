@@ -1,0 +1,24 @@
+This directory contains examples of the librasp library usage.
+
+blink
+    GPIO input/output test
+
+dht_probe
+    Command line utility to probe DHT 11/22 temperature sensor.
+
+dsth_list
+    List all Dallas family sensors connected via 1-wire to the platform and
+    probe them.
+
+hcsr_probe
+    HC SR04 distance sensor probe.
+
+usleep_stc
+    Accuracy comparison between standard usleep() and STC implementation of the
+    function.
+
+w1_list
+    List all 1-wire masters and slaves connected via them to the platform.
+
+/nrf24
+    Contains nRF24L01 transceiver examples.

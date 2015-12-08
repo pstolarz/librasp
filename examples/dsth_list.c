@@ -10,6 +10,10 @@
    See the License for more information.
  */
 
+/* List all Dallas family sensors connected via 1-wire to the platform and
+   probe them.
+ */
+
 #include <stdio.h>
 #include "librasp/devices/ds_therm.h"
 
