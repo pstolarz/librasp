@@ -10,7 +10,7 @@
    See the License for more information.
  */
 
-/* List all 1-wire masters and slaves connected via them to the platform.
+/* List all 1-wire masters and slaves connected to the platform.
  */
 
 #include <stdio.h>

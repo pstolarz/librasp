@@ -10,6 +10,13 @@
    See the License for more information.
  */
 
+/* Read PISO shift register example.
+
+   This code was tested on 74165 TI shift reg. with SH/LD, CLK and DATA pins
+   connected to GPIO as defined by GPIO_XXX macros. CLK-INH is not used and must
+   be pulled to the ground.
+ */
+
 #include <stdio.h>
 #include "librasp/devices/shr_piso.h"
 

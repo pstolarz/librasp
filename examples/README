@@ -1,7 +1,7 @@
 This directory contains examples of the librasp library usage.
 
 blink
-    GPIO input/output test
+    GPIO input/output test.
 
 dht_probe
     Command line utility to probe DHT 11/22 temperature sensor.
@@ -13,12 +13,15 @@ dsth_list
 hcsr_probe
     HC SR04 distance sensor probe.
 
+piso
+    Read PISO shift register example.
+
 usleep_stc
     Accuracy comparison between standard usleep() and STC implementation of the
     function.
 
 w1_list
-    List all 1-wire masters and slaves connected via them to the platform.
+    List all 1-wire masters and slaves connected to the platform.
 
 /nrf24
     Contains nRF24L01 transceiver examples.

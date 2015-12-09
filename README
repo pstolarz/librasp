@@ -5,7 +5,7 @@ Dallas family of temperature sensors (e.g. DS18B20, DS1822, DS1825), HC-SR04
 distance sensor, PISO shift register...
 
 Expect detailed documentation and more sensors support in the future. For now
-look for examples in /examples and /inc/librasp directories for API spec.
+look for examples in /examples and /inc/librasp for API spec.
 
 License
 -------
