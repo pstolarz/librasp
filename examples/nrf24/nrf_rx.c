@@ -52,6 +52,7 @@ int main(void)
     spi_hndl_t spi_h;
     gpio_hndl_t gpio_h;
 
+    int lc, msgc;
     uint8_t irq_flg, rx[NRF_MAX_PL], addr[5];
 
     memset(rx, 0, sizeof(rx));
@@ -71,6 +72,7 @@ int main(void)
     errno = 0;
     hal_nrf_set_spi_hndl(&spi_h);
 
+restart:
     hal_nrf_set_power_mode(HAL_NRF_PWR_UP);
     usleep(1500);
 
@@ -102,12 +104,12 @@ int main(void)
 
     printf("Tuned up, waiting for messages...\n");
 
-    /* waiting for messages
-     */
     chip_enable();
     usleep(150);
 
-    for (;!rx_finish;)
+    /* waiting for messages
+     */
+    for (msgc=lc=0; !rx_finish; lc++)
     {
         irq_flg = hal_nrf_get_clear_irq_flags();
         if(irq_flg & (1U<<HAL_NRF_RX_DR))
@@ -116,11 +118,23 @@ int main(void)
             while(!hal_nrf_rx_fifo_empty())
             {
                 hal_nrf_read_rx_payload(rx);
-                if (rx[0]==0xAB) printf("Received: \"%s\"\n", &rx[1]);
+                if (rx[0]==0xAB) {
+                    msgc = lc;
+                    printf("Received: \"%s\"\n", &rx[1]);
+                }
+                hal_nrf_flush_rx();
             }
-
-            hal_nrf_flush_rx();
         }
+
+        /* for unknown reason, from time to time, RX seems to be locking in and
+           stops to detect incoming traffic until restarting the transceiver */
+        if (lc-msgc >= 5000) {
+            msgc = lc;
+            printf("No RX traffic detected, restarting the transceiver\n");
+            chip_disable();
+            goto restart;
+        }
+
         usleep(1000);
     }
 

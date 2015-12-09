@@ -8,12 +8,11 @@ EXAMPS = \
     w1_list \
     dsth_list \
     dht_probe \
-    hcsr_probe \
-    nrf24
+    hcsr_probe
 
 .PHONY: all clean nrf24
 
-all: $(EXAMPS)
+all: $(EXAMPS) nrf24
 
 clean:
 	rm -f $(EXAMPS)
