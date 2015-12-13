@@ -65,6 +65,10 @@
 #include <stdbool.h>
 #include "librasp/spi.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* max payload size */
 #define NRF_MAX_PL         32
 
@@ -796,5 +800,9 @@ void hal_nrf_enable_continious_wave(bool enable);
  * Check if continuous carrier transmit is enabled.
  */
 bool hal_nrf_is_continious_wave_enabled(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __LR_DEVS_NRF_HAL_H__ */

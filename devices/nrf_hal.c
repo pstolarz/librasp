@@ -334,7 +334,7 @@ uint8_t hal_nrf_get_pipe_status(uint8_t pipe_num)
     CHK_SPI_ERR();
     en_aa = hal_nrf_read_reg(EN_AA);
 
-    if (pipe_num>=0 && pipe_num<=5) {
+    if (pipe_num<=5) {
         en_rx_r = (en_rxaddr & (uint8_t)BIT((int)pipe_num)) !=0;
         en_aa_r = (en_aa & (uint8_t)BIT((int)pipe_num)) !=0;
     }
@@ -490,8 +490,8 @@ hal_nrf_datarate_t hal_nrf_get_datarate(void)
 {
     uint8_t rf_setup = hal_nrf_read_reg(RF_SETUP);
     return (hal_nrf_datarate_t)
-        ((rf_setup & (uint8_t)BIT(RF_DR_LOW))<<1) |
-        (rf_setup & (uint8_t)BIT(RF_DR_HIGH));
+        (((rf_setup & (uint8_t)BIT(RF_DR_LOW))<<1) |
+         (rf_setup & (uint8_t)BIT(RF_DR_HIGH)));
 }
 
 bool hal_nrf_rx_fifo_empty(void)
