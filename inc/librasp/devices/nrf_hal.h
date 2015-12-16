@@ -419,13 +419,27 @@ void hal_nrf_close_pipe(hal_nrf_address_t pipe_num);
  * 2. Setting its address,
  * 3. Setting RX payload length.
  * @param pipe_num Pipe to open
- * @param auto_ack Auto_Ack ON/OFF
  * @param addr Pipe address, if 0: don't change the address.
+ * @param auto_ack Auto_Ack ON/OFF
  * @param pload_width RX payload length (or max. payload length in case if
  * dynamic feature is enabled).
  */
-void hal_nrf_cconfig_rx_pipe(hal_nrf_address_t pipe_num,
-    bool auto_ack, const uint8_t *addr, uint8_t pload_width);
+void hal_nrf_config_rx_pipe(hal_nrf_address_t pipe_num,
+    const uint8_t *addr, bool auto_ack, uint8_t pload_width);
+
+/**
+ * Configure TX transmission by:
+ * 1. Setting receiver address.
+ * 2. Setting TX output power.
+ * 3. Open pipe 0 for receiving ACKs packets.
+ * 4. Setting auto-retry parameters.
+ * @param addr Receiver address, if 0: don't change the address.
+ * @param power TX output power.
+ * @param retr Number of retransmits, 0 means retransmit OFF.
+ * @param delay Retransmit delay in usec (in range 250-4000 with step 250).
+ */
+void hal_nrf_config_tx(const uint8_t *addr,
+    hal_nrf_output_power_t power, uint8_t retr, uint16_t delay);
 
 /**
  * Set radio's RX address and TX address.
@@ -450,7 +464,7 @@ uint8_t hal_nrf_get_address(uint8_t address, uint8_t *addr);
 /**
  * Set auto acknowledge parameters.
  * Use this function to set retransmit and retransmit delay parameters.
- * @param retr Number of retransmits, 0 equ retransmit OFF
+ * @param retr Number of retransmits, 0 means retransmit OFF.
  * @param delay Retransmit delay in usec (in range 250-4000 with step 250).
  */
 void hal_nrf_set_auto_retr(uint8_t retr, uint16_t delay);

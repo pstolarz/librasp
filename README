@@ -1,6 +1,6 @@
 Raspberry Pi library for GPIO, 1-Wire, SPI, System Time Counter (STC) access. As
 an example of usage there have been provided APIs for handling various popular
-sensors like wireless nRF24L01 transceiver, DHT temperature sensors (DHT11, DHT22),
+devices like wireless nRF24L01 transceiver, DHT temperature sensors (DHT11/22),
 Dallas family of temperature sensors (e.g. DS18B20, DS1822, DS1825), HC-SR04
 distance sensor, PISO shift register...
 

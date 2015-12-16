@@ -309,8 +309,8 @@ finish:
     return;
 }
 
-void hal_nrf_cconfig_rx_pipe(hal_nrf_address_t pipe_num,
-    bool auto_ack, const uint8_t *addr, uint8_t pload_width)
+void hal_nrf_config_rx_pipe(hal_nrf_address_t pipe_num,
+    const uint8_t *addr, bool auto_ack, uint8_t pload_width)
 {
     hal_nrf_open_pipe(pipe_num, auto_ack);
     CHK_SPI_ERR();
@@ -321,6 +321,28 @@ void hal_nrf_cconfig_rx_pipe(hal_nrf_address_t pipe_num,
     }
 
     hal_nrf_set_rx_payload_width((uint8_t)pipe_num, pload_width);
+finish:
+    return;
+}
+
+void hal_nrf_config_tx(const uint8_t *addr,
+    hal_nrf_output_power_t power, uint8_t retr, uint16_t delay)
+{
+    hal_nrf_set_output_power(power);
+    CHK_SPI_ERR();
+
+    hal_nrf_set_auto_retr(retr, delay);
+    CHK_SPI_ERR();
+
+    if (addr) {
+        hal_nrf_set_address(HAL_NRF_TX, addr);
+        CHK_SPI_ERR();
+        hal_nrf_set_address(HAL_NRF_PIPE0, addr);
+        CHK_SPI_ERR();
+    }
+
+    /* open RX pipe 0 for receiving ack */
+    hal_nrf_open_pipe(HAL_NRF_PIPE0, true);
 finish:
     return;
 }
