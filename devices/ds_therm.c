@@ -74,11 +74,11 @@ lr_errc_t dsth_convert_t(
         p_w1_h, therm, &cmd, 1, (stat_len ? p_status : NULL), stat_len);
 }
 
-#ifdef CONFIG_WRITE_PULLUP
 /* exported; see header for details */
 lr_errc_t dsth_convert_t_with_pullup(
     w1_hndl_t *p_w1_h, w1_slave_id_t therm, unsigned int pullup)
 {
+#ifdef CONFIG_WRITE_PULLUP
     uint8_t cmd_buf[8];
     uint8_t msg_buf[get_w1_cmds_bufsz(1)];
     w1_msg_t *p_msg = (w1_msg_t*)msg_buf;
@@ -89,8 +89,10 @@ lr_errc_t dsth_convert_t_with_pullup(
     add_write_pullup_w1_cmd(p_msg, cmd_buf, 1, pullup);
 
     return w1_msg_exec(p_w1_h, p_msg);
-}
+#else
+    return LREC_NOT_SUPP;
 #endif
+}
 
 /* exported; see header for details */
 lr_errc_t dsth_read_scratchpad(

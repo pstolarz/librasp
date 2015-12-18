@@ -51,17 +51,22 @@ static uint8_t convert_cmd_type(w1_cmd_type tpy)
     switch (tpy)
     {
     case w1_cmd_read:
-        ret=W1_CMD_READ; break;
+        ret=W1_CMD_READ;
+        break;
     case w1_cmd_write:
-        ret=W1_CMD_WRITE; break;
+        ret=W1_CMD_WRITE;
+        break;
     case w1_cmd_touch:
-        ret=W1_CMD_TOUCH; break;
+        ret=W1_CMD_TOUCH;
+        break;
     case w1_cmd_bus_reset:
-        ret=W1_CMD_RESET; break;
-#ifdef CONFIG_WRITE_PULLUP
+        ret=W1_CMD_RESET;
+        break;
     case w1_cmd_write_pullup:
-        ret=W1_CMD_WRITE_PULLUP; break;
+#ifdef CONFIG_WRITE_PULLUP
+        ret=W1_CMD_WRITE_PULLUP;
 #endif
+        break;
     }
     return ret;
 }
@@ -784,42 +789,44 @@ finish:
 /* exported; see header for details */
 lr_errc_t add_read_w1_cmd(w1_msg_t *p_w1msg, uint8_t *p_data, size_t len)
 {
-    w1_cmd_extra_dta_t extra = {.not_used=0};
+    w1_cmd_extra_dta_t extra = {};
     return add_w1_cmd(p_w1msg, w1_cmd_read, p_data, len, extra);
 }
 
 /* exported; see header for details */
 lr_errc_t add_write_w1_cmd(w1_msg_t *p_w1msg, uint8_t *p_data, size_t len)
 {
-    w1_cmd_extra_dta_t extra = {.not_used=0};
+    w1_cmd_extra_dta_t extra = {};
     return add_w1_cmd(p_w1msg, w1_cmd_write, p_data, len, extra);
 }
 
 /* exported; see header for details */
 lr_errc_t add_touch_w1_cmd(w1_msg_t *p_w1msg, uint8_t *p_data, size_t len)
 {
-    w1_cmd_extra_dta_t extra = {.not_used=0};
+    w1_cmd_extra_dta_t extra = {};
     return add_w1_cmd(p_w1msg, w1_cmd_touch, p_data, len, extra);
 }
 
 /* exported; see header for details */
 lr_errc_t add_bus_reset_w1_cmd(w1_msg_t *p_w1msg)
 {
-    w1_cmd_extra_dta_t extra = {.not_used=0};
+    w1_cmd_extra_dta_t extra = {};
     return add_w1_cmd(p_w1msg, w1_cmd_bus_reset, NULL, 0, extra);
 }
 
-#ifdef CONFIG_WRITE_PULLUP
 /* exported; see header for details */
 lr_errc_t add_write_pullup_w1_cmd(
     w1_msg_t *p_w1msg, uint8_t *p_data, size_t len, unsigned int pullup)
 {
+#ifdef CONFIG_WRITE_PULLUP
     w1_cmd_extra_dta_t extra;
 
     extra.pullup = pullup;
     return add_w1_cmd(p_w1msg, w1_cmd_write_pullup, p_data, len, extra);
-}
+#else
+    return LREC_NOT_SUPP;
 #endif
+}
 
 /* exported; see header for details */
 lr_errc_t w1_msg_exec(w1_hndl_t *p_hndl, w1_msg_t *p_w1msg)

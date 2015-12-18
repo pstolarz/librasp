@@ -36,10 +36,7 @@ typedef enum _w1_msg_type_t
 
 typedef union _w1_cmd_extra_dta_t
 {
-        unsigned int not_used;
-#ifdef CONFIG_WRITE_PULLUP
-        unsigned int pullup;
-#endif
+    unsigned int pullup;
 } w1_cmd_extra_dta_t;
 
 /* types of w1 commands */
@@ -48,10 +45,9 @@ typedef enum _w1_cmd_type
     w1_cmd_read=0,
     w1_cmd_write,
     w1_cmd_touch,
-    w1_cmd_bus_reset            /* master only */
-#ifdef CONFIG_WRITE_PULLUP
-    ,w1_cmd_write_pullup
-#endif
+    w1_cmd_bus_reset,       /* master only */
+    w1_cmd_write_pullup     /* library must be configured to handle
+                               this command type (CONFIG_WRITE_PULLUP) */
 } w1_cmd_type;
 
 typedef struct _w1_cmd_t {
@@ -128,10 +124,9 @@ lr_errc_t add_touch_w1_cmd(w1_msg_t *p_w1msg, uint8_t *p_data, size_t len);
 /* for master message only */
 lr_errc_t add_bus_reset_w1_cmd(w1_msg_t *p_w1msg);
 
-#ifdef CONFIG_WRITE_PULLUP
+/* library must be configured to support this function (CONFIG_WRITE_PULLUP) */
 lr_errc_t add_write_pullup_w1_cmd(
     w1_msg_t *p_w1msg, uint8_t *p_data, size_t len, unsigned int pullup);
-#endif
 
 /* Execute w1 message. Data to be sent/retrieve are taken/written into the
    buffers passed during w1 message command(s) provisioned by add_XXX_w1_cmd()

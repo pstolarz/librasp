@@ -65,10 +65,9 @@ lr_errc_t dsth_read_pow_supply(
     w1_hndl_t *p_w1_h, w1_slave_id_t therm, bool_t *p_is_paras);
 lr_errc_t dsth_convert_t(
     w1_hndl_t *p_w1_h, w1_slave_id_t therm, void *p_status, size_t stat_len);
-#ifdef CONFIG_WRITE_PULLUP
+/* library must be configured to support this function (CONFIG_WRITE_PULLUP) */
 lr_errc_t dsth_convert_t_with_pullup(
     w1_hndl_t *p_w1_h, w1_slave_id_t therm, unsigned int pullup);
-#endif
 lr_errc_t dsth_read_scratchpad(
     w1_hndl_t *p_w1_h, w1_slave_id_t therm, dsth_sratchpad_t *p_scpd);
 lr_errc_t dsth_write_scratchpad(w1_hndl_t *p_w1_h,
