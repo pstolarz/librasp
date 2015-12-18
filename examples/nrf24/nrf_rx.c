@@ -141,7 +141,7 @@ restart:
             }
         }
 
-        /* for unknown reason, from time to time, RX seems to be locking in and
+        /* for unknown reason, from time to time RX seems to be locking in and
            stops to detect incoming traffic until restarting the transceiver */
         if (i >= 5000) {
             i = 0;

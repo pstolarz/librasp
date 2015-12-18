@@ -15,8 +15,7 @@
 #include <sys/resource.h>
 #include "librasp/clock.h"
 
-/* Accuracy comparison between standard usleep() and STC implementation of the
-   function.
+/* Accuracy check for usleep() STC implementation.
  */
 
 int main(int argc, char **argv)

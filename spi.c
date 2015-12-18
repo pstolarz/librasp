@@ -44,7 +44,8 @@ lr_errc_t spi_init(spi_hndl_t *p_hndl, int dev_no, int cs_no,
     p_hndl->fd = open(dev_name, O_RDWR);
 
     if (p_hndl->fd == -1) {
-        err_printf("open() SPI error: %s\n", strerror(errno));
+        err_printf("[%s] open() SPI error: %d; %s\n",
+            __func__, errno, strerror(errno));
         ret = LREC_OPEN_ERR;
         goto finish;
     }
@@ -77,7 +78,8 @@ lr_errc_t spi_set_mode(spi_hndl_t *p_hndl, int mode)
     if(ioctl(p_hndl->fd, SPI_IOC_WR_MODE, &u8)==-1 ||
        ioctl(p_hndl->fd, SPI_IOC_RD_MODE, &u8)==-1)
     {
-        err_printf("ioctl() SPI MODE error: %s\n", strerror(errno));
+        err_printf("[%s] ioctl() SPI MODE error: %d; %s\n",
+            __func__, errno, strerror(errno));
         ret = LREC_IOCTL_ERR;
     }
     return ret;
@@ -94,7 +96,8 @@ lr_errc_t spi_set_lsb(spi_hndl_t *p_hndl, bool_t lsb_first)
     if(ioctl(p_hndl->fd, SPI_IOC_WR_LSB_FIRST, &u8)==-1 ||
        ioctl(p_hndl->fd, SPI_IOC_RD_LSB_FIRST, &u8)==-1)
     {
-        err_printf("ioctl() SPI LSB_FIRST error: %s\n", strerror(errno));
+        err_printf("[%s] ioctl() SPI LSB_FIRST error: %d; %s\n",
+            __func__, errno, strerror(errno));
         ret = LREC_IOCTL_ERR;
     }
     return ret;
@@ -111,7 +114,8 @@ lr_errc_t spi_set_bits_per_word(spi_hndl_t *p_hndl, int bits_per_word)
     if(ioctl(p_hndl->fd, SPI_IOC_WR_BITS_PER_WORD, &u8)==-1 ||
        ioctl(p_hndl->fd, SPI_IOC_RD_BITS_PER_WORD, &u8)==-1)
     {
-        err_printf("ioctl() SPI BITS_PER_WORD error: %s\n", strerror(errno));
+        err_printf("[%s] ioctl() SPI BITS_PER_WORD error: %d; %s\n",
+            __func__, errno, strerror(errno));
         ret = LREC_IOCTL_ERR;
     }
     return ret;
@@ -128,7 +132,8 @@ lr_errc_t spi_set_speed(spi_hndl_t *p_hndl, unsigned speed_hz)
     if(ioctl(p_hndl->fd, SPI_IOC_WR_MAX_SPEED_HZ, &u32)==-1 ||
        ioctl(p_hndl->fd, SPI_IOC_RD_MAX_SPEED_HZ, &u32)==-1)
     {
-        err_printf("ioctl() SPI MAX_SPEED_HZ error: %s\n", strerror(errno));
+        err_printf("[%s] ioctl() SPI MAX_SPEED_HZ error: %d; %s\n",
+            __func__, errno, strerror(errno));
         ret = LREC_IOCTL_ERR;
     }
     return ret;
@@ -152,7 +157,8 @@ lr_errc_t spi_transmit(spi_hndl_t *p_hndl, uint8_t *tx, uint8_t *rx, size_t len)
     tr.cs_change = p_hndl->cs_change;
 
     if (ioctl(p_hndl->fd, SPI_IOC_MESSAGE(1), &tr)==-1) {
-        err_printf("ioctl() SPI transfer error: %s \n", strerror(errno));
+        err_printf("[%s] ioctl() SPI transfer error: %d; %s\n",
+            __func__, errno, strerror(errno));
         ret = LREC_IOCTL_ERR;
     }
     return ret;

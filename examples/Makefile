@@ -3,6 +3,7 @@ CFLAGS=-Wall -I../inc
 
 EXAMPS = \
     blink \
+    gpio_poll \
     usleep_stc \
     piso \
     w1_list \

@@ -14,6 +14,7 @@
 #define __LR_CLOCK_H__
 
 #include "librasp/common.h"
+#include "librasp/bcm_platform.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,34 +30,45 @@ typedef struct _clock_hndl_t
 {
     clock_driver_t drv;
 
-    /* BCM driver related */
+    /* I/O driver related */
     struct {
         volatile void *p_stc_io;
-    } bcm;
+    } io;
 } clock_hndl_t;
 
-/* Free clock handle. Need not to be called for the SYS driver. */
-void clock_free(clock_hndl_t *p_hndl);
-
-/* Init clock handle. If configured, the function always successes for the SYS
-   driver.
-
+/* Initialize clock handle and set a given driver as active for the handle.
    NOTE: The initiated handle may be freely shared between all system clock
-   operations basing on the same driver.
+   operations.
  */
 lr_errc_t clock_init(clock_hndl_t *p_hndl, clock_driver_t drv);
 
+/* Activate clock driver for (already initialized) handle. Any subsequent clock
+   API calls will be performed in a context of this driver.
+
+   This function always success for SYS driver (if configured of course). For
+   I/O driver may for the first-time call on I/O mapping error (LREC_MMAP_ERR).
+   Once successes it will always success for the subsequent I/O driver
+   activations.
+ */
+lr_errc_t clock_set_driver(clock_hndl_t *p_hndl, clock_driver_t drv);
+
+/* Free clock handle */
+void clock_free(clock_hndl_t *p_hndl);
+
 /* Get 32/64 bit clock tick counters; the 64-bit version is slightly slower than
    the 32-bit counterpart and should be avoided for time critical operations.
-   The functions always success for the BCM driver. */
+   The functions always success for the I/O driver.
+ */
 lr_errc_t clock_get_ticks32(clock_hndl_t *p_hndl, uint32_t *p_ticks);
 lr_errc_t clock_get_ticks64(clock_hndl_t *p_hndl, uint64_t *p_ticks);
 
-/* Sleep at least 'usec'. The function always successes for the BCM driver. */
+/* Sleep at least 'usec'. The function always successes for the I/O driver.
+ */
 lr_errc_t clock_usleep(clock_hndl_t *p_hndl, uint32_t usec);
 
-/* Sleep at least 'usec'. The function is BCM driver specific and always
-   successes if called for this driver. */
+/* Sleep at least 'usec'. The function is BCM driver specific, must be called
+   for I/O driver and always success in this case.
+ */
 lr_errc_t clock_bcm_usleep(clock_hndl_t *p_hndl, uint32_t usec, uint32_t thrshd);
 
 #ifdef __cplusplus
