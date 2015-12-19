@@ -10,7 +10,7 @@
    See the License for more information.
  */
 
-/* GPIO sysfs polling.
+/* Polling GPIO for an event (SYSFS version).
  */
 
 #include <stdio.h>
@@ -35,7 +35,7 @@ int main(int argc, char **argv)
     /* switch to SYSFS driver */
     gpio_set_driver(&gpio_h, gpio_drv_sysfs);
 
-    /* export the GPIO is required by sysfs */
+    /* export the GPIO (required by sysfs) */
     EXEC_G(gpio_sysfs_export(&gpio_h, GPIO_IN));
     exprt = TRUE;
 

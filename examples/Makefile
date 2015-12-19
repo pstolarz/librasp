@@ -8,6 +8,7 @@ EXAMPS = \
     piso \
     w1_list \
     dsth_list \
+    dsth_list2 \
     dht_probe \
     hcsr_probe
 

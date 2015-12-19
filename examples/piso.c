@@ -13,7 +13,7 @@
 /* Read PISO shift register example.
 
    This code was tested on 74165 TI shift reg. with SH/LD, CLK and DATA pins
-   connected to GPIO as defined by GPIO_XXX macros. CLK-INH is not used and must
+   connected to GPIOs as defined by GPIO_XXX defs. CLK-INH is not used and must
    be pulled to the ground.
  */
 

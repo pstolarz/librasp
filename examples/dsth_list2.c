@@ -12,19 +12,20 @@
 
 /* List and probe all Dallas family sensors connected via 1-wire to the platform.
 
-   The therms are probed one by one. If SET_DSTH_RES is defined the temperature
-   resolution may be set for each of the sensors.
+   This examples demonstrates improved version of temperature probation by
+   sending single command to all therms to probe them, next read the results
+   one by one.
  */
 
 #include <stdio.h>
+#include <unistd.h>
 #include "librasp/devices/ds_therm.h"
 
 #define MAX_MASTERS     32
 #define MAX_SLAVES      128
 
-/* define if want to set the temp. resolution for every DS sensor, e.g.
-#define SET_DSTH_RES    DSTH_RES_12BIT
- */
+/* the example assumes common resolution for all probed sensors */
+#define DSTH_RES        DSTH_RES_12BIT
 
 int main(int argc, char **argv)
 {
@@ -51,23 +52,31 @@ int main(int argc, char **argv)
             {
                 printf("w1 master [0x%08x]\n", p_masts->ids[i]);
 
+                /* issue a command to probe temperature for all sensors
+                   connected to the iterated bus master */
+                if (dsth_convert_t_all(&w1_h, p_masts->ids[i])!=LREC_SUCCESS)
+                    continue;
+
+                /* for the purpose of this example ignore parasitic power case */
+                usleep(dsth_get_conv_time(DSTH_RES)*1000);
+
                 if (search_w1_slaves(&w1_h,
                     p_masts->ids[i], p_slavs, NULL)!=LREC_SUCCESS) continue;
+
+                /* read the results loop */
                 for (j=0; j<p_slavs->sz; j++)
                 {
-                    int temp;
+                    dsth_scratchpad_t scpd;
                     const char *dsth_name = dsth_name(p_slavs->ids[j]);
 
                     if (!dsth_name) continue;
                     printf(" %s [0x%016llx]; T:", dsth_name, p_slavs->ids[j]);
 
-#ifdef SET_DSTH_RES
-                    dsth_set_res(&w1_h, p_slavs->ids[j], SET_DSTH_RES);
-#endif
-                    if (dsth_probe(&w1_h, p_slavs->ids[j], &temp)==LREC_SUCCESS)
+                    if (dsth_read_scratchpad(
+                        &w1_h, p_slavs->ids[j], &scpd)==LREC_SUCCESS)
                     {
-                        printf("%d.%d\n",
-                            temp/1000, (temp%1000)*(temp<0 ? -1 : 1));
+                        int temp = dsth_get_temp_scratchpad(&scpd, DSTH_RES, 0);
+                        printf("%d.%d\n", temp/1000, (temp%1000)*(temp<0 ? -1 : 1));
                     } else
                         printf("???\n");
                 }

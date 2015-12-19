@@ -10,10 +10,10 @@
    See the License for more information.
  */
 
-/* GPIO input/output test.
+/* GPIO input/output test (I/O version).
 
    Connect switch and LED to the GPIO_IN and GPIO_OUT pins respectively. Press
-   switch and observe LED blinking.
+   the switch and observe LED blinking.
  */
 
 #include <unistd.h>

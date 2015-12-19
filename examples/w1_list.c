@@ -23,7 +23,9 @@ int main(int argc, char **argv)
 {
     w1_hndl_t w1_h;
 
+#ifdef DEBUG
     set_librasp_log_level(LRLOG_DEBUG);
+#endif
 
     if (w1_init(&w1_h)==LREC_SUCCESS)
     {

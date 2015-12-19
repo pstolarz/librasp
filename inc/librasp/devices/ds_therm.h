@@ -46,7 +46,7 @@ extern "C" {
     (((id)&0xff)==DS28EA00 ? "DS28EA00" : \
     (NULL)))))
 
-typedef struct _dsth_sratchpad_t
+typedef struct _dsth_scratchpad_t
 {
     uint8_t temp_lsb;
     uint8_t temp_hsb;
@@ -57,7 +57,7 @@ typedef struct _dsth_sratchpad_t
     uint8_t res2;
     uint8_t res3;
     uint8_t crc;
-} dsth_sratchpad_t;
+} dsth_scratchpad_t;
 
 /* Low level therm functions
  */
@@ -69,12 +69,24 @@ lr_errc_t dsth_convert_t(
 lr_errc_t dsth_convert_t_with_pullup(
     w1_hndl_t *p_w1_h, w1_slave_id_t therm, unsigned int pullup);
 lr_errc_t dsth_read_scratchpad(
-    w1_hndl_t *p_w1_h, w1_slave_id_t therm, dsth_sratchpad_t *p_scpd);
+    w1_hndl_t *p_w1_h, w1_slave_id_t therm, dsth_scratchpad_t *p_scpd);
 lr_errc_t dsth_write_scratchpad(w1_hndl_t *p_w1_h,
     w1_slave_id_t therm, uint8_t th, uint8_t tl, uint8_t cfg_reg);
 lr_errc_t dsth_copy_scratchpad(w1_hndl_t *p_w1_h, w1_slave_id_t therm);
 lr_errc_t dsth_recall_eeprom(
     w1_hndl_t *p_w1_h, w1_slave_id_t therm, uint8_t *p_status);
+
+/* Functions below perform the same actions as their counterparts above but
+   for all devices connected to the master bus.
+ */
+lr_errc_t dsth_convert_t_all(w1_hndl_t *p_w1_h, w1_master_id_t master);
+lr_errc_t dsth_convert_t_with_pullup_all(
+    w1_hndl_t *p_w1_h, w1_master_id_t master, unsigned int pullup);
+lr_errc_t dsth_write_scratchpad_all(w1_hndl_t *p_w1_h,
+    w1_master_id_t master, uint8_t th, uint8_t tl, uint8_t cfg_reg);
+lr_errc_t dsth_copy_scratchpad_all(w1_hndl_t *p_w1_h, w1_master_id_t master);
+lr_errc_t dsth_recall_eeprom_all(
+    w1_hndl_t *p_w1_h, w1_master_id_t master, uint8_t *p_status);
 
 typedef enum _dsth_res_t {
     DSTH_RES_9BIT =0,
@@ -84,14 +96,31 @@ typedef enum _dsth_res_t {
 } dsth_res_t;
 
 #define DSTH_CONV_T_12BIT   750U
+
+/* Returns conversion time (in milliseconds) for given resolution */
 #define dsth_get_conv_time(res) \
     (DSTH_CONV_T_12BIT >> (3-(((unsigned int)(res))%4)))
 
-/* Get/set therm resolution */
+/* Get/set therm resolution for a single therm.
+   The resolution is set be fetching current config, modifying it and writing
+   back to a device.
+ */
 lr_errc_t dsth_get_res(w1_hndl_t *p_w1_h, w1_slave_id_t therm, dsth_res_t *p_res);
 lr_errc_t dsth_set_res(w1_hndl_t *p_w1_h, w1_slave_id_t therm, dsth_res_t res);
 
-/* Probe the temperature and write it under 'p_temp' (x1000).
+/* Function fetching temperature value from the scratchpad (previously obtained
+   by dsth_read_scratchpad()). The temperature value depends on the thermometer
+   resolution 'res' (may be obtained by dsth_get_res()). The value is scaled by
+   1000.
+
+   Since the temperature encoding in the scratchpad may depend on therm type
+   (at this moment it doesn't), 'thrm_typ' is reserved for the future use,
+   pass 0 there.
+ */
+int dsth_get_temp_scratchpad(
+    const dsth_scratchpad_t *p_scpd, dsth_res_t res, int thrm_typ);
+
+/* Probe a single therm for the temperature and write it under 'p_temp' (x1000).
  */
 lr_errc_t dsth_probe(w1_hndl_t *p_w1_h, w1_slave_id_t therm, int *p_temp);
 

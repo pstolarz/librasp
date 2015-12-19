@@ -56,7 +56,7 @@ lr_errc_t hcsr_probe(gpio_hndl_t *p_gpio_h, clock_hndl_t *p_clk_h,
     EXEC_RG(gpio_set_value(p_gpio_h, trig_gpio, 1)); set_high=TRUE;
     EXECLK_RG(clock_usleep(p_clk_h, 100));
 
-    /* 30us high */
+    /* 30us low */
     EXEC_RG(gpio_set_value(p_gpio_h, trig_gpio, 0)); set_high=FALSE;
 
     /* retrieve the response loop */
