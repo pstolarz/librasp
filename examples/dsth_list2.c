@@ -12,8 +12,8 @@
 
 /* List and probe all Dallas family sensors connected via 1-wire to the platform.
 
-   This examples demonstrates improved version of temperature probation by
-   sending single command to all therms to probe them, next read the results
+   This example demonstrates improved version of temperature probation by
+   sending single command to all therms to probe them, next reading the results
    one by one.
  */
 
