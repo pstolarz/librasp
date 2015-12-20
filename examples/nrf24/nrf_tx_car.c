@@ -34,7 +34,7 @@
 
 #define NRF_EXEC(cmd) (cmd); if (errno==ECOMM) goto finish;
 
-bool_t trans_finish = FALSE;
+static bool_t trans_finish = FALSE;
 
 /* signal handler */
 static void term_handler(int signal)

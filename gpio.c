@@ -466,7 +466,7 @@ lr_errc_t gpio_sysfs_unexport(gpio_hndl_t *p_hndl, unsigned int gpio)
 /* exported; see header for details */
 lr_errc_t gpio_sysfs_poll(gpio_hndl_t *p_hndl, unsigned int gpio, int timeout)
 {
-    int plres;
+    int plres, tmp;
     struct pollfd fds;
     lr_errc_t ret=LREC_SUCCESS;
 
@@ -485,8 +485,9 @@ lr_errc_t gpio_sysfs_poll(gpio_hndl_t *p_hndl, unsigned int gpio, int timeout)
         goto finish;
     }
 
-    /* dummy read "purges" sysfs handle */
-    read(fds.fd, NULL, 0);
+    /* purge sysfs handle from pending data */
+    lseek(fds.fd, 0, SEEK_SET);
+    while (read(fds.fd, &tmp, sizeof(tmp))>0);
 
     plres = poll(&fds, 1, timeout);
     if (plres<0) {

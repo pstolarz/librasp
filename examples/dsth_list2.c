@@ -12,7 +12,7 @@
 
 /* List and probe all Dallas family sensors connected via 1-wire to the platform.
 
-   This example demonstrates improved version of temperature probation by
+   This example demonstrates improved version of cumulative temperature read by
    sending single command to all therms to probe them, next reading the results
    one by one.
  */
@@ -53,11 +53,11 @@ int main(int argc, char **argv)
                 printf("w1 master [0x%08x]\n", p_masts->ids[i]);
 
                 /* issue a command to probe temperature for all sensors
-                   connected to the iterated bus master */
+                   connected to the iterated bus master, for the purpose of
+                   this example ignore parasitic power case */
                 if (dsth_convert_t_all(&w1_h, p_masts->ids[i])!=LREC_SUCCESS)
                     continue;
 
-                /* for the purpose of this example ignore parasitic power case */
                 usleep(dsth_get_conv_time(DSTH_RES)*1000);
 
                 if (search_w1_slaves(&w1_h,

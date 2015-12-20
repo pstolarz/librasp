@@ -11,6 +11,7 @@
  */
 
 /* nRF24 RX example on the CHANNEL.
+   nRF's polling via IRQ pin may be enabled by specifying GPIO_IRQ.
  */
 #include <errno.h>
 #include <signal.h>
@@ -23,15 +24,22 @@
 
 #define CHANNEL     20
 
+/* GPIO pin where the nRF IRQ pin is connected, undef for no IRQ polling */
+/* #define GPIO_IRQ    22 */
+
 #define SPI_CS      0
 #define GPIO_CE     17
+
+/* msecs */
+#define RESTART_DELAY   5000
 
 #define chip_enable()  gpio_set_value(&gpio_h, GPIO_CE, 1)
 #define chip_disable() gpio_set_value(&gpio_h, GPIO_CE, 0)
 
 #define NRF_EXEC(cmd) (cmd); if (errno==ECOMM) goto finish;
+#define LR_EXEC(cmd) (cmd); if (cmd!=LREC_SUCCESS) goto finish;
 
-bool_t rx_finish = FALSE;
+static bool_t rx_finish = FALSE;
 
 /* signal handler */
 static void term_handler(int signal)
@@ -70,6 +78,13 @@ static bool_t init_rx()
     /* TX output power for auto ack */
     hal_nrf_set_output_power(HAL_NRF_0DBM);
 
+#ifdef GPIO_IRQ
+    /* unmask RX irq and mask the remaining */
+    NRF_EXEC(hal_nrf_set_irq_mode(HAL_NRF_RX_DR, true));
+    hal_nrf_set_irq_mode(HAL_NRF_TX_DS, false);
+    hal_nrf_set_irq_mode(HAL_NRF_MAX_RT, false);
+#endif
+
     ret=TRUE;
 finish:
     return ret;
@@ -77,23 +92,38 @@ finish:
 
 int main(void)
 {
-    bool_t spi_ini=FALSE, gpio_ini=FALSE, pwr_up=FALSE;
+    struct {
+        unsigned int spi : 1;
+        unsigned int gpio_h : 1;
+        unsigned int pwr_up : 1;
+        unsigned int sysfs_exp : 1;
+    } init = {};
+
     spi_hndl_t spi_h;
     gpio_hndl_t gpio_h;
 
-    int i;
+    int cnt;
     uint8_t irq_flg, rx[NRF_MAX_PL], addr[5];
 
     memset(rx, 0, sizeof(rx));
 
-    if (gpio_init(&gpio_h, gpio_drv_io)!=LREC_SUCCESS) goto finish;
-    else gpio_ini=TRUE;
+    LR_EXEC(gpio_init(&gpio_h, gpio_drv_io));
+    init.gpio_h=TRUE;
 
+    /* initialize GPIOs */
     gpio_direction_output(&gpio_h, GPIO_CE, 0);
+#ifdef GPIO_IRQ
+    gpio_set_driver(&gpio_h, gpio_drv_sysfs);
+    LR_EXEC(gpio_sysfs_export(&gpio_h, GPIO_IRQ));
+    init.sysfs_exp=TRUE;
+    LR_EXEC(gpio_direction_input(&gpio_h, GPIO_IRQ));
+    LR_EXEC(gpio_set_event(&gpio_h, GPIO_IRQ, GPIO_EVENT_BOTH));
+    gpio_set_driver(&gpio_h, gpio_drv_io);
+#endif
 
-    if (spi_init(&spi_h, 0, SPI_CS, SPI_MODE_0, FALSE, 8,
-        SPI_USE_DEF, SPI_USE_DEF, SPI_USE_DEF)!=LREC_SUCCESS) goto finish;
-    else spi_ini=TRUE;
+    LR_EXEC(spi_init( &spi_h, 0, SPI_CS, SPI_MODE_0,
+        FALSE, 8, SPI_USE_DEF, SPI_USE_DEF, SPI_USE_DEF));
+    init.spi=TRUE;
 
     signal(SIGINT, term_handler);
     signal(SIGTERM, term_handler);
@@ -108,24 +138,32 @@ int main(void)
     printf("Tuned up, waiting for messages...\n");
 
 restart:
-    if (pwr_up) {
+    if (init.pwr_up) {
         chip_disable();
         hal_nrf_set_power_mode(HAL_NRF_PWR_DOWN);
-        if (!errno) pwr_up=FALSE;
+        if (!errno) init.pwr_up=FALSE;
         usleep(1000);
     }
     hal_nrf_set_power_mode(HAL_NRF_PWR_UP);
-    if (!errno) pwr_up=TRUE;
+    if (!errno) init.pwr_up=TRUE;
     usleep(1500);
 
-    if (!pwr_up || !init_rx()) goto finish;
+    if (!init.pwr_up || !init_rx()) goto finish;
 
     chip_enable();
     usleep(150);
 
     /* RX loop */
-    for (i=0; !rx_finish; i++)
+    for (cnt=0; !rx_finish;)
     {
+#ifdef GPIO_IRQ
+        /* wait for an irq */
+        gpio_set_driver(&gpio_h, gpio_drv_sysfs);
+        if (gpio_sysfs_poll(&gpio_h, GPIO_IRQ, RESTART_DELAY)==LREC_TIMEOUT)
+            cnt+=RESTART_DELAY;
+        gpio_set_driver(&gpio_h, gpio_drv_io);
+#endif
+        /* check irq type */
         irq_flg = hal_nrf_get_clear_irq_flags();
         if(irq_flg & (1U<<HAL_NRF_RX_DR))
         {
@@ -137,28 +175,40 @@ restart:
                     printf("Received: \"%s\"\n", &rx[1]);
                 }
                 hal_nrf_flush_rx();
-                i = 0;
+                cnt = 0;
             }
         }
 
         /* for unknown reason, from time to time RX seems to be locking in and
-           stops to detect incoming traffic until restarting the transceiver */
-        if (i >= 5000) {
-            i = 0;
+           stops to detect incoming traffic until restarting the transceiver is
+           performed */
+        if (cnt >= RESTART_DELAY) {
+            cnt = 0;
+            /* printf("No RX activity detected, restarting transceiver\n"); */
             goto restart;
         }
 
+#ifndef GPIO_IRQ
+        /* check irq flags every 1 msec for no polling case*/
         usleep(1000);
+        cnt++;
+#endif
     }
 
 finish:
     if (errno==ECOMM) printf("SPI communication error\n");
-    if (pwr_up) {
+    if (init.pwr_up) {
         chip_disable();
         hal_nrf_set_power_mode(HAL_NRF_PWR_DOWN);
     }
-    if (spi_ini) spi_free(&spi_h);
-    if (gpio_ini) gpio_free(&gpio_h);
+    if (init.spi) spi_free(&spi_h);
+#ifdef GPIO_IRQ
+    if (init.sysfs_exp) {
+        gpio_set_driver(&gpio_h, gpio_drv_sysfs);
+        gpio_sysfs_unexport(&gpio_h, GPIO_IRQ);
+    }
+#endif
+    if (init.gpio_h) gpio_free(&gpio_h);
 
     return 0;
 }
