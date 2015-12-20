@@ -108,12 +108,12 @@ lr_errc_t gpio_bcm_get_func(
     lr_errc_t ret=LREC_SUCCESS;
 
     gpio %= GPIO_NUM;
-    if (p_hndl->drv==gpio_drv_io) {
+    if (p_hndl->io.p_gpio_io) {
         volatile uint32_t *p_gpfsel = IO_REG32_PTR(
             p_hndl->io.p_gpio_io, GPFSEL0+sizeof(uint32_t)*(gpio/10));
         *p_func = (gpio_bcm_func_t)((*p_gpfsel>>(3*(gpio%10)))&7);
     } else {
-        ret=LREC_NOT_SUPP;
+        ret=LREC_NOINIT;
     }
     return ret;
 }
@@ -125,14 +125,14 @@ lr_errc_t gpio_bcm_set_func(
     lr_errc_t ret=LREC_SUCCESS;
 
     gpio %= GPIO_NUM;
-    if (p_hndl->drv==gpio_drv_io) {
+    if (p_hndl->io.p_gpio_io) {
         unsigned int shl = 3*(gpio%10);
         volatile uint32_t *p_gpfsel = IO_REG32_PTR(
             p_hndl->io.p_gpio_io, GPFSEL0+sizeof(uint32_t)*(gpio/10));
         *p_gpfsel = (volatile uint32_t)SET_BITFLD(
             *p_gpfsel, ((uint32_t)func&7)<<shl, (uint32_t)7<<shl);
     } else {
-        ret=LREC_NOT_SUPP;
+        ret=LREC_NOINIT;
     }
     return ret;
 }
@@ -367,7 +367,8 @@ lr_errc_t gpio_bcm_get_event_stat(
     lr_errc_t ret=LREC_SUCCESS;
 
     gpio %= GPIO_NUM;
-    if (p_hndl->drv==gpio_drv_io) {
+    if (p_hndl->io.p_gpio_io)
+    {
 #ifdef CONFIG_BCM_GPIO_EVENTS
         volatile uint32_t *p_gpeds = IO_REG32_PTR(
             p_hndl->io.p_gpio_io, GPEDS0+sizeof(uint32_t)*(gpio>>5));
@@ -378,7 +379,7 @@ lr_errc_t gpio_bcm_get_event_stat(
         ret=LREC_NOT_SUPP;
 #endif
     } else {
-        ret=LREC_NOT_SUPP;
+        ret=LREC_NOINIT;
     }
     return ret;
 }
@@ -390,7 +391,7 @@ lr_errc_t gpio_bcm_set_pull_config(
     lr_errc_t ret=LREC_SUCCESS;
 
     gpio %= GPIO_NUM;
-    if (p_hndl->drv==gpio_drv_io)
+    if (p_hndl->io.p_gpio_io)
     {
         volatile uint32_t *p_gppud = IO_REG32_PTR(p_hndl->io.p_gpio_io, GPPUD);
         volatile uint32_t *p_gppudclk = IO_REG32_PTR(
@@ -407,7 +408,7 @@ lr_errc_t gpio_bcm_set_pull_config(
         *p_gppud = 0;
         *p_gppudclk = 0;
     } else {
-        ret=LREC_NOT_SUPP;
+        ret=LREC_NOINIT;
     }
     return ret;
 }
@@ -452,15 +453,13 @@ finish:
 /* exported; see header for details */
 lr_errc_t gpio_sysfs_export(gpio_hndl_t *p_hndl, unsigned int gpio)
 {
-    return ((p_hndl->drv==gpio_drv_sysfs) ?
-        sysfs_set_export(p_hndl, gpio, TRUE) : LREC_NOT_SUPP);
+    return sysfs_set_export(p_hndl, gpio, TRUE);
 }
 
 /* exported; see header for details */
 lr_errc_t gpio_sysfs_unexport(gpio_hndl_t *p_hndl, unsigned int gpio)
 {
-    return ((p_hndl->drv==gpio_drv_sysfs) ?
-        sysfs_set_export(p_hndl, gpio, FALSE) : LREC_NOT_SUPP);
+    return sysfs_set_export(p_hndl, gpio, FALSE);
 }
 
 /* exported; see header for details */
@@ -471,10 +470,6 @@ lr_errc_t gpio_sysfs_poll(gpio_hndl_t *p_hndl, unsigned int gpio, int timeout)
     lr_errc_t ret=LREC_SUCCESS;
 
     gpio %= GPIO_NUM;
-    if (p_hndl->drv!=gpio_drv_sysfs) {
-        ret=LREC_NOT_SUPP;
-        goto finish;
-    }
 
     fds.fd = p_hndl->sysfs.valfds[gpio];
     fds.events = POLLPRI;

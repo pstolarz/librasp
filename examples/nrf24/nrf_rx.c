@@ -157,11 +157,9 @@ restart:
     for (cnt=0; !rx_finish;)
     {
 #ifdef GPIO_IRQ
-        /* wait for an irq */
-        gpio_set_driver(&gpio_h, gpio_drv_sysfs);
+        /* poll GPIO_IRQ */
         if (gpio_sysfs_poll(&gpio_h, GPIO_IRQ, RESTART_DELAY)==LREC_TIMEOUT)
             cnt+=RESTART_DELAY;
-        gpio_set_driver(&gpio_h, gpio_drv_io);
 #endif
         /* check irq type */
         irq_flg = hal_nrf_get_clear_irq_flags();
@@ -203,10 +201,7 @@ finish:
     }
     if (init.spi) spi_free(&spi_h);
 #ifdef GPIO_IRQ
-    if (init.sysfs_exp) {
-        gpio_set_driver(&gpio_h, gpio_drv_sysfs);
-        gpio_sysfs_unexport(&gpio_h, GPIO_IRQ);
-    }
+    if (init.sysfs_exp) gpio_sysfs_unexport(&gpio_h, GPIO_IRQ);
 #endif
     if (init.gpio_h) gpio_free(&gpio_h);
 

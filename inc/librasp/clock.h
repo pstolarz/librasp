@@ -37,6 +37,7 @@ typedef struct _clock_hndl_t
 } clock_hndl_t;
 
 /* Initialize clock handle and set a given driver as active for the handle.
+
    NOTE: The initiated handle may be freely shared between all system clock
    operations.
  */
@@ -52,22 +53,38 @@ lr_errc_t clock_init(clock_hndl_t *p_hndl, clock_driver_t drv);
  */
 lr_errc_t clock_set_driver(clock_hndl_t *p_hndl, clock_driver_t drv);
 
-/* Free clock handle */
+/* Free clock handle
+ */
 void clock_free(clock_hndl_t *p_hndl);
 
 /* Get 32/64 bit clock tick counters; the 64-bit version is slightly slower than
    the 32-bit counterpart and should be avoided for time critical operations.
-   The functions always success for the I/O driver.
+
+   Operation performed by the functions and its result depends on the active
+   driver set:
+   - For the I/O driver the functions always success,
+   - If configured the function may fail for the SYS driver if the underlying
+     system function failed.
  */
 lr_errc_t clock_get_ticks32(clock_hndl_t *p_hndl, uint32_t *p_ticks);
 lr_errc_t clock_get_ticks64(clock_hndl_t *p_hndl, uint64_t *p_ticks);
 
-/* Sleep at least 'usec'. The function always successes for the I/O driver.
+/* Sleep at least 'usec'.
+
+   Operation performed by the function and its result depends on the active
+   driver set:
+   - For the I/O driver the functions always success,
+   - If configured the function may fail for the SYS driver if the underlying
+     system function failed.
  */
 lr_errc_t clock_usleep(clock_hndl_t *p_hndl, uint32_t usec);
 
-/* Sleep at least 'usec'. The function is BCM driver specific, must be called
-   for I/O driver and always success in this case.
+/* Sleep at least 'usec'.
+
+   NOTE: The function requires initialized I/O driver, which means
+   clock_set_driver() must be previously called for this driver (but the driver
+   need not to be active at the moment of call) otherwise LREC_NOINIT is
+   returned.
  */
 lr_errc_t clock_bcm_usleep(clock_hndl_t *p_hndl, uint32_t usec, uint32_t thrshd);
 

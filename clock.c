@@ -156,13 +156,14 @@ lr_errc_t clock_bcm_usleep(clock_hndl_t *p_hndl, uint32_t usec, uint32_t thrshd)
 {
     lr_errc_t ret=LREC_SUCCESS;
 
-    if (p_hndl->drv==clock_drv_io) {
+    if (p_hndl->io.p_stc_io)
+    {
         uint32_t ticks, stop, time;
 
         ticks = get_bcm_clock_ticks_lo(p_hndl);
         stop = ticks+usec;
 
-        for (time=0; time<usec; )
+        for (time=0; time<usec;)
         {
             uint32_t delta;
 
@@ -178,7 +179,7 @@ lr_errc_t clock_bcm_usleep(clock_hndl_t *p_hndl, uint32_t usec, uint32_t thrshd)
             }
         }
     } else {
-        ret=LREC_NOT_SUPP;
+        ret=LREC_NOINIT;
     }
     return ret;
 }
