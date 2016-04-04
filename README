@@ -9,6 +9,20 @@ For examples look at /examples.
 
 Expect more sensors support in the future.
 
+1-wire and parasite powering
+----------------------------
+The original Linux kernel w1 driver (the "wire" module) doesn't provide proper
+interface for parasite powering of w1 slaves via userland's netlink protocol.
+To handle this issue there has been provided a patch for the kernel allowing
+the library to fully support the parasite mode. Look in /kernel directory for
+more info.
+
+After the patch is successfully applied, configure the library with
+CONFIG_WRITE_PULLUP parameter by updating /config.h and compile it.
+
+Refer to /examples/dsth_list* samples for more info on probing the parasite
+powered Dallas family temperature sensors.
+
 License
 -------
 2 clause BSD license. See LICENSE file for details.

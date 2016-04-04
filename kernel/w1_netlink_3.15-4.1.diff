@@ -1,0 +1,38 @@
+diff --git a/drivers/w1/w1_netlink.c b/drivers/w1/w1_netlink.c
+index 881597a..26918d3 100644
+--- a/drivers/w1/w1_netlink.c
++++ b/drivers/w1/w1_netlink.c
+@@ -321,6 +321,13 @@ static int w1_process_command_io(struct w1_master *dev,
+ 	case W1_CMD_WRITE:
+ 		w1_write_block(dev, cmd->data, cmd->len);
+ 		break;
++	case W1_CMD_WRITE_PULLUP:
++		if (cmd->len>=sizeof(u16)) {
++			w1_next_pullup(dev, *(u16*)(cmd->data));
++			w1_write_block(dev, &cmd->data[sizeof(u16)], cmd->len-sizeof(u16));
++		} else
++			err = -EINVAL;
++		break;
+ 	default:
+ 		err = -EINVAL;
+ 		break;
+@@ -381,6 +388,7 @@ static int w1_process_command_master(struct w1_master *dev,
+ 		break;
+ 	case W1_CMD_READ:
+ 	case W1_CMD_WRITE:
++    case W1_CMD_WRITE_PULLUP:
+ 	case W1_CMD_TOUCH:
+ 		err = w1_process_command_io(dev, req_cmd);
+ 		break;
+diff --git a/drivers/w1/w1_netlink.h b/drivers/w1/w1_netlink.h
+index c99a9ce..241b87d 100644
+--- a/drivers/w1/w1_netlink.h
++++ b/drivers/w1/w1_netlink.h
+@@ -115,6 +115,7 @@ enum w1_commands {
+ 	W1_CMD_SLAVE_ADD,
+ 	W1_CMD_SLAVE_REMOVE,
+ 	W1_CMD_LIST_SLAVES,
++	W1_CMD_WRITE_PULLUP=20,
+ 	W1_CMD_MAX
+ };
+ 
