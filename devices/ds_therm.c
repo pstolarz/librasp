@@ -54,7 +54,7 @@ finish:
 
 /* Execute single command for all slaves connected to a 'master' bus */
 static lr_errc_t exec_cmd_all(w1_hndl_t *p_w1_h, w1_master_id_t master,
-    const void *p_cmd, size_t cmd_len, unsigned int pullup)
+    const void *p_cmd, size_t cmd_len, bool_t has_pullup, unsigned int pullup)
 {
     lr_errc_t ret=LREC_SUCCESS;
     uint8_t cmd_buf[32];
@@ -66,15 +66,15 @@ static lr_errc_t exec_cmd_all(w1_hndl_t *p_w1_h, w1_master_id_t master,
 
     add_bus_reset_w1_cmd(p_msg);
 
-    /* SKIP_ROM addresses all slaves */
+    /* SKIP_ROM addresses - all slaves */
     cmd_buf[0] = SKIP_ROM;
     add_write_w1_cmd(p_msg, &cmd_buf[0], 1);
 
     memcpy(&cmd_buf[1], p_cmd, cmd_len);
 
 #ifdef CONFIG_WRITE_PULLUP
-    if (pullup!=(unsigned int)-1) {
-        add_write_pullup_w1_cmd(p_msg, cmd_buf[1], cmd_len+1, pullup);
+    if (has_pullup) {
+        add_write_pullup_w1_cmd(p_msg, &cmd_buf[1], cmd_len+1, pullup);
     } else
 #endif
         add_write_w1_cmd(p_msg, &cmd_buf[1], cmd_len+1);
@@ -175,7 +175,7 @@ lr_errc_t dsth_recall_eeprom(
 lr_errc_t dsth_convert_t_all(w1_hndl_t *p_w1_h, w1_master_id_t master)
 {
     uint8_t cmd=CONVERT_T;
-    return exec_cmd_all(p_w1_h, master, &cmd, 1, (unsigned int)-1);
+    return exec_cmd_all(p_w1_h, master, &cmd, 1, FALSE, 0);
 }
 
 /* exported; see header for details */
@@ -184,7 +184,7 @@ lr_errc_t dsth_convert_t_with_pullup_all(
 {
 #ifdef CONFIG_WRITE_PULLUP
     uint8_t cmd=CONVERT_T;
-    return exec_cmd_all(p_w1_h, master, &cmd, 1, pullup);
+    return exec_cmd_all(p_w1_h, master, &cmd, 1, TRUE, pullup);
 #else
     return LREC_NOT_SUPP;
 #endif
@@ -199,14 +199,14 @@ lr_errc_t dsth_write_scratchpad_all(w1_hndl_t *p_w1_h,
     cmd[1]=th;
     cmd[2]=tl;
     cmd[3]=cfg_reg;
-    return exec_cmd_all(p_w1_h, master, cmd, sizeof(cmd), (unsigned int)-1);
+    return exec_cmd_all(p_w1_h, master, cmd, sizeof(cmd), FALSE, 0);
 }
 
 /* exported; see header for details */
 lr_errc_t dsth_copy_scratchpad_all(w1_hndl_t *p_w1_h, w1_master_id_t master)
 {
     uint8_t cmd=COPY_SCRATCHPAD;
-    return exec_cmd_all(p_w1_h, master, &cmd, 1, (unsigned int)-1);
+    return exec_cmd_all(p_w1_h, master, &cmd, 1, FALSE, 0);
 }
 
 /* exported; see header for details */
@@ -214,7 +214,7 @@ lr_errc_t dsth_recall_eeprom_all(
     w1_hndl_t *p_w1_h, w1_master_id_t master, uint8_t *p_status)
 {
     uint8_t cmd=RECALL_EEPROM;
-    return exec_cmd_all(p_w1_h, master, &cmd, 1, (unsigned int)-1);
+    return exec_cmd_all(p_w1_h, master, &cmd, 1, FALSE, 0);
 }
 
 /* exported; see header for details */

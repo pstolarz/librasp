@@ -123,7 +123,7 @@ static lr_errc_t __dht_probe(
 
         len=sprintf(prnt_buf, "DHT sensor response signal timings:\n");
         for (j=0; j<i; j++)
-            len+=sprintf(prnt_buf+len, "  %d: %d\n", j, siglens[j]);
+            len+=sprintf(prnt_buf+len, "  %d: %d\n", (int)j, siglens[j]);
         dbg_printf(prnt_buf);
     }
 

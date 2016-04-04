@@ -59,7 +59,8 @@ int main(int argc, char **argv)
                     const char *dsth_name = dsth_name(p_slavs->ids[j]);
 
                     if (!dsth_name) continue;
-                    printf(" %s [0x%016llx]; T:", dsth_name, p_slavs->ids[j]);
+                    printf(" %s [0x%016llx]; T:",
+                        dsth_name, (long long unsigned)p_slavs->ids[j]);
 
 #ifdef SET_DSTH_RES
                     dsth_set_res(&w1_h, p_slavs->ids[j], SET_DSTH_RES);

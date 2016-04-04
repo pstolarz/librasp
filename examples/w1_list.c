@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 
         if (list_w1_masters(&w1_h, p_masts, &n_masts)==LREC_SUCCESS)
         {
-            printf("Total number of masters: %d\n", n_masts);
+            printf("Total number of masters: %d\n", (int)n_masts);
             for (i=0; i<p_masts->sz; i++)
             {
                 printf(" 0x%08x\n", p_masts->ids[i]);
@@ -48,9 +48,9 @@ int main(int argc, char **argv)
                 if (search_w1_slaves(&w1_h,
                     p_masts->ids[i], p_slavs, &n_slavs)!=LREC_SUCCESS) continue;
 
-                printf("  Total number of slaves: %d\n", n_slavs);
+                printf("  Total number of slaves: %d\n", (int)n_slavs);
                 for (j=0; j<p_slavs->sz; j++)
-                    printf("   0x%016llx\n", p_slavs->ids[j]);
+                    printf("   0x%016llx\n", (long long unsigned)p_slavs->ids[j]);
             }
         }
 

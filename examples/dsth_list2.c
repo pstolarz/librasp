@@ -27,6 +27,16 @@
 /* the example assumes common resolution for all probed sensors */
 #define DSTH_RES        DSTH_RES_12BIT
 
+/* define if sensors are powered parasitically
+
+   NOTE1: Do not mix sensors of various powering mode (normal vs parasite) on
+   the same wire for this example (this is not the case for 'dsth_list' example).
+   NOTE2: The library need to be compiled with CONFIG_WRITE_PULLUP
+   to support parasite powering.
+ */
+#undef PARASITE_POWER
+
+
 int main(int argc, char **argv)
 {
     w1_hndl_t w1_h;
@@ -50,15 +60,20 @@ int main(int argc, char **argv)
         {
             for (i=0; i<p_masts->sz; i++)
             {
+                unsigned int conv_time = dsth_get_conv_time(DSTH_RES);
+
                 printf("w1 master [0x%08x]\n", p_masts->ids[i]);
 
-                /* issue a command to probe temperature for all sensors
-                   connected to the iterated bus master, for the purpose of
-                   this example ignore parasitic power case */
+#ifdef PARASITE_POWER
+                if (dsth_convert_t_with_pullup_all(
+                    &w1_h, p_masts->ids[i], conv_time)!=LREC_SUCCESS)
+                    continue;
+#else
                 if (dsth_convert_t_all(&w1_h, p_masts->ids[i])!=LREC_SUCCESS)
                     continue;
 
-                usleep(dsth_get_conv_time(DSTH_RES)*1000);
+                usleep(conv_time*1000);
+#endif
 
                 if (search_w1_slaves(&w1_h,
                     p_masts->ids[i], p_slavs, NULL)!=LREC_SUCCESS) continue;
@@ -70,7 +85,8 @@ int main(int argc, char **argv)
                     const char *dsth_name = dsth_name(p_slavs->ids[j]);
 
                     if (!dsth_name) continue;
-                    printf(" %s [0x%016llx]; T:", dsth_name, p_slavs->ids[j]);
+                    printf(" %s [0x%016llx]; T:",
+                        dsth_name, (long long unsigned)p_slavs->ids[j]);
 
                     if (dsth_read_scratchpad(
                         &w1_h, p_slavs->ids[j], &scpd)==LREC_SUCCESS)
