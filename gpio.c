@@ -207,14 +207,15 @@ lr_errc_t gpio_direction_output(
     lr_errc_t ret=LREC_SUCCESS;
 
     if (p_hndl->drv==gpio_drv_io) {
-        /* always successes */
+        /* set value at first to avoid output blink;
+           operations below always success */
+        gpio_set_value(p_hndl, gpio, val);
         gpio_bcm_set_func(p_hndl, gpio, gpio_bcm_out);
     } else {
-        ret = sysfs_set_direction(p_hndl, gpio, TRUE);
-    }
-
-    if (ret==LREC_SUCCESS) {
-        ret=gpio_set_value(p_hndl, gpio, val);
+        /* sysfs prevents setting a GPIO value before
+           declaring its direction as output */
+        if ((ret=sysfs_set_direction(p_hndl, gpio, TRUE))==LREC_SUCCESS)
+            ret = gpio_set_value(p_hndl, gpio, val);
     }
     return ret;
 }

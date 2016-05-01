@@ -71,6 +71,9 @@ void gpio_free(gpio_hndl_t *p_hndl);
    - For the I/O driver the functions always success,
    - For SYSFS driver the function may fail if the requested GPIO has not been
      exported or due to sysfs access error.
+
+   NOTE: For I/O driver gpio_direction_output() function guarantees no GPIO
+   output blink with requested value after switching to the output mode.
  */
 lr_errc_t gpio_direction_input(gpio_hndl_t *p_hndl, unsigned int gpio);
 lr_errc_t gpio_direction_output(
