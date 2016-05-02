@@ -20,7 +20,7 @@ static uint8_t crc8(const void *p_in, size_t len)
 {
     size_t i;
     uint8_t b, crc=0;
-    
+
     while (len--) {
         b = *((uint8_t*)p_in++);
         for (i=8; i; i--, b>>=1)
@@ -29,7 +29,9 @@ static uint8_t crc8(const void *p_in, size_t len)
     return crc;
 }
 
-/* Execute single command for given slave 'slv' */
+/* Execute command for a given slave 'slv'. Bus probing may be performed after
+   the execution.
+ */
 static lr_errc_t exec_cmd(w1_hndl_t *p_w1_h, w1_slave_id_t slv,
     const void *p_cmd, size_t cmd_len, void *p_out, size_t out_len)
 {
@@ -52,7 +54,31 @@ finish:
     return ret;
 }
 
-/* Execute single command for all slaves connected to a 'master' bus */
+#ifdef CONFIG_WRITE_PULLUP
+/* Execute 1-byte length command 'cmd' (w/o following args) for a given slave
+   'slv' with strong pull-up time following the execution. Due to command
+   character no bus probing is performed.
+ */
+lr_errc_t exec_cmd_pullup(
+    w1_hndl_t *p_w1_h, w1_slave_id_t slv, uint8_t cmd, unsigned int pullup)
+{
+    uint8_t cmd_buf[8];
+    uint8_t msg_buf[get_w1_cmds_bufsz(1)];
+    w1_msg_t *p_msg = (w1_msg_t*)msg_buf;
+
+    w1_slave_msg_init(p_msg, slv, 1);
+
+    cmd_buf[0] = cmd;
+    add_write_pullup_w1_cmd(p_msg, cmd_buf, 1, pullup);
+
+    return w1_msg_exec(p_w1_h, p_msg);
+}
+#endif
+
+/* Execute command for all slaves connected to a 'master' bus. Due to command
+   character no bus probing is performed. Optional strong pull-up time may be
+   requested for command execution.
+ */
 static lr_errc_t exec_cmd_all(w1_hndl_t *p_w1_h, w1_master_id_t master,
     const void *p_cmd, size_t cmd_len, bool_t has_pullup, unsigned int pullup)
 {
@@ -111,16 +137,7 @@ lr_errc_t dsth_convert_t_with_pullup(
     w1_hndl_t *p_w1_h, w1_slave_id_t therm, unsigned int pullup)
 {
 #ifdef CONFIG_WRITE_PULLUP
-    uint8_t cmd_buf[8];
-    uint8_t msg_buf[get_w1_cmds_bufsz(1)];
-    w1_msg_t *p_msg = (w1_msg_t*)msg_buf;
-
-    w1_slave_msg_init(p_msg, therm, 1);
-
-    cmd_buf[0] = CONVERT_T;
-    add_write_pullup_w1_cmd(p_msg, cmd_buf, 1, pullup);
-
-    return w1_msg_exec(p_w1_h, p_msg);
+    return exec_cmd_pullup(p_w1_h, therm, CONVERT_T, pullup);
 #else
     return LREC_NOT_SUPP;
 #endif
@@ -161,6 +178,17 @@ lr_errc_t dsth_copy_scratchpad(w1_hndl_t *p_w1_h, w1_slave_id_t therm)
 {
     uint8_t cmd=COPY_SCRATCHPAD;
     return exec_cmd(p_w1_h, therm, &cmd, 1, NULL, 0);
+}
+
+/* exported; see header for details */
+lr_errc_t dsth_copy_scratchpad_with_pullup(
+    w1_hndl_t *p_w1_h, w1_slave_id_t therm, unsigned int pullup)
+{
+#ifdef CONFIG_WRITE_PULLUP
+    return exec_cmd_pullup(p_w1_h, therm, COPY_SCRATCHPAD, pullup);
+#else
+    return LREC_NOT_SUPP;
+#endif
 }
 
 /* exported; see header for details */
@@ -207,6 +235,18 @@ lr_errc_t dsth_copy_scratchpad_all(w1_hndl_t *p_w1_h, w1_master_id_t master)
 {
     uint8_t cmd=COPY_SCRATCHPAD;
     return exec_cmd_all(p_w1_h, master, &cmd, 1, FALSE, 0);
+}
+
+/* exported; see header for details */
+lr_errc_t dsth_copy_scratchpad_with_pullup_all(
+    w1_hndl_t *p_w1_h, w1_master_id_t master, unsigned int pullup)
+{
+#ifdef CONFIG_WRITE_PULLUP
+    uint8_t cmd=COPY_SCRATCHPAD;
+    return exec_cmd_all(p_w1_h, master, &cmd, 1, TRUE, pullup);
+#else
+    return LREC_NOT_SUPP;
+#endif
 }
 
 /* exported; see header for details */
@@ -267,7 +307,7 @@ lr_errc_t dsth_probe(w1_hndl_t *p_w1_h, w1_slave_id_t therm, int *p_temp)
     EXEC_RG(dsth_read_pow_supply(p_w1_h, therm, &is_paras));
     dbg_printf("[%s] Is parasitic power: %d\n", __func__, is_paras);
 #endif
- 
+
     EXEC_RG(dsth_get_res(p_w1_h, therm, &res));
     dbg_printf("[%s] DS therm resolution: %d-bit\n", __func__, (int)res+9);
     conv_time = dsth_get_conv_time(res);

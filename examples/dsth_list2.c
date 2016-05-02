@@ -29,7 +29,7 @@
 
 /* define if sensors are powered parasitically
 
-   NOTE1: Do not mix sensors of various powering mode (normal vs parasite) on
+   NOTE1: Do not mix sensors of various powering mode (external vs parasite) on
    the same wire for this example (this is not the case for 'dsth_list' example).
    NOTE2: The library need to be compiled with CONFIG_WRITE_PULLUP
    to support parasite powering.

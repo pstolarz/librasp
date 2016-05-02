@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015 Piotr Stolarz
+   Copyright (c) 2015,2016 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -73,6 +73,8 @@ lr_errc_t dsth_read_scratchpad(
 lr_errc_t dsth_write_scratchpad(w1_hndl_t *p_w1_h,
     w1_slave_id_t therm, uint8_t th, uint8_t tl, uint8_t cfg_reg);
 lr_errc_t dsth_copy_scratchpad(w1_hndl_t *p_w1_h, w1_slave_id_t therm);
+lr_errc_t dsth_copy_scratchpad_with_pullup(
+    w1_hndl_t *p_w1_h, w1_slave_id_t therm, unsigned int pullup);
 lr_errc_t dsth_recall_eeprom(
     w1_hndl_t *p_w1_h, w1_slave_id_t therm, uint8_t *p_status);
 
@@ -85,6 +87,8 @@ lr_errc_t dsth_convert_t_with_pullup_all(
 lr_errc_t dsth_write_scratchpad_all(w1_hndl_t *p_w1_h,
     w1_master_id_t master, uint8_t th, uint8_t tl, uint8_t cfg_reg);
 lr_errc_t dsth_copy_scratchpad_all(w1_hndl_t *p_w1_h, w1_master_id_t master);
+lr_errc_t dsth_copy_scratchpad_with_pullup_all(
+    w1_hndl_t *p_w1_h, w1_master_id_t master, unsigned int pullup);
 lr_errc_t dsth_recall_eeprom_all(
     w1_hndl_t *p_w1_h, w1_master_id_t master, uint8_t *p_status);
 
@@ -95,11 +99,14 @@ typedef enum _dsth_res_t {
     DSTH_RES_12BIT
 } dsth_res_t;
 
-#define DSTH_CONV_T_12BIT   750U
+#define DSTH_CONV_T_12BIT       750U
 
-/* Returns conversion time (in milliseconds) for given resolution */
+/* Returns conversion time (msec) for given resolution */
 #define dsth_get_conv_time(res) \
     (DSTH_CONV_T_12BIT >> (3-(((unsigned int)(res))%4)))
+
+/* min. strong pull-up time for COPY_SCRATCHPAD command (msec) */
+#define COPY_SCRATCHPAD_PULLUP  10U
 
 /* Get/set therm resolution for a single therm.
    The resolution is set be fetching current config, modifying it and writing
