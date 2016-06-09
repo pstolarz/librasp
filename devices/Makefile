@@ -10,10 +10,10 @@ OBJS = \
 
 .PHONY: all clean
 
-all: $(OBJS)
+all: devices.a
 
 clean:
-	rm -f $(OBJS)
+	rm -f devices.a $(OBJS)
 
 ../config.h=../config.h
 ../inc/librasp/common.h=../inc/librasp/common.h
@@ -33,3 +33,6 @@ nrf_hal.o: $(../inc/librasp/devices/nrf_hal.h)
 
 %.o: %.c $(../common.h)
 	$(CC) -c $(CFLAGS) $< -o $@
+
+devices.a: $(OBJS)
+	ar rcs $@ $(OBJS)

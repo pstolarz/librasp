@@ -8,7 +8,7 @@ OBJS = \
     spi.o \
     w1.o
 
-.PHONY: all clean devices
+.PHONY: all clean makedev
 
 all: librasp.a
 
@@ -17,7 +17,7 @@ clean:
 	$(MAKE) -C./devices clean
 	$(MAKE) -C./examples clean
 
-devices:
+makedev ./devices/devices.a:
 	$(MAKE) -C./devices
 
 config.h=config.h
@@ -39,5 +39,7 @@ w1.o: $(inc/librasp/w1.h) $(w1_netlink.h)
 %.o: %.c $(common.h)
 	$(CC) -c $(CFLAGS) $< -o $@
 
-librasp.a: $(OBJS) devices
-	ar rcs $@ $(OBJS) ./devices/*.o
+librasp.a: $(OBJS) makedev ./devices/devices.a
+	@if [ "$?" != "makedev" ]; then \
+		(PS4=; set -x; ar rcs $@ $(OBJS) ./devices/*.o;) \
+	fi

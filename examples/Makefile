@@ -12,7 +12,7 @@ EXAMPS = \
     dht_probe \
     hcsr_probe
 
-.PHONY: all clean nrf24
+.PHONY: all clean nrf24 makelib
 
 all: $(EXAMPS) nrf24
 
@@ -23,8 +23,10 @@ clean:
 nrf24:
 	$(MAKE) -C./nrf24
 
-../librasp.a:
+makelib ../librasp.a:
 	$(MAKE) -C.. librasp.a
 
-%: %.c ../librasp.a
-	$(CC) $(CFLAGS) -o $@ $^
+%: %.c makelib ../librasp.a
+	@if [ "$?" != "makelib" ]; then \
+		(PS4=; set -x; $(CC) $(CFLAGS) $< -o $@ ../librasp.a;) \
+	fi

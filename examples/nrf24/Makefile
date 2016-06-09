@@ -7,15 +7,17 @@ EXAMPS = \
     nrf_tx_car \
     nrf_scan
 
-.PHONY: all clean
+.PHONY: all clean makelib
 
 all: $(EXAMPS)
 
 clean:
 	rm -f $(EXAMPS)
 
-../../librasp.a:
+makelib ../../librasp.a:
 	$(MAKE) -C../.. librasp.a
 
-%: %.c ../../librasp.a
-	$(CC) $(CFLAGS) -o $@ $^
+%: %.c makelib ../../librasp.a
+	@if [ "$?" != "makelib" ]; then \
+		(PS4=; set -x; $(CC) $(CFLAGS) $< -o $@ ../../librasp.a;) \
+	fi
