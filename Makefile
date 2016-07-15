@@ -41,5 +41,5 @@ w1.o: $(inc/librasp/w1.h) $(w1_netlink.h)
 
 librasp.a: $(OBJS) makedev ./devices/devices.a
 	@if [ "$?" != "makedev" ]; then \
-		(PS4=; set -x; ar rcs $@ $(OBJS) ./devices/*.o;) \
+	  (PS4=; set -x; ar rcs $@ $(OBJS) ./devices/*.o;) \
 	fi

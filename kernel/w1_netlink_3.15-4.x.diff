@@ -35,4 +35,3 @@ index c99a9ce..241b87d 100644
 +	W1_CMD_WRITE_PULLUP=20,
  	W1_CMD_MAX
  };
- 

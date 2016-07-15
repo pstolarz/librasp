@@ -28,5 +28,5 @@ makelib ../librasp.a:
 
 %: %.c makelib ../librasp.a
 	@if [ "$?" != "makelib" ]; then \
-		(PS4=; set -x; $(CC) $(CFLAGS) $< -o $@ ../librasp.a;) \
+	  (PS4=; set -x; $(CC) $(CFLAGS) $< -o $@ ../librasp.a;) \
 	fi

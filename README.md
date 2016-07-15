@@ -23,8 +23,11 @@ interface for parasite powering of w1 slaves via userland's netlink protocol.
    for more info.
 2. RPi uses `w1-gpio` module as a master w1 driver. The driver need to be
    configured to support bit-banged pullup for parasite powering. Add the
-   following line in `/boot/config.txt` to turn it on the device-tree:
-   `dtoverlay=w1-gpio,pullup=on`. Reboot is required.
+   following line in `/boot/config.txt` to turn it on the device-tree (reboot
+   is required):
+
+    `dtoverlay=w1-gpio,pullup=on`
+
 3. Configure the library with `CONFIG_WRITE_PULLUP` parameter by updating
    `./config.h` while building the library.
 
