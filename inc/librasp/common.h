@@ -93,7 +93,8 @@ typedef enum _platform_t
     bcm_2709
 } platform_t;
 
-/* Platform type detection. Returns -1 in case the platform can't be recognized */
+/* Platform type detection. Returns -1 in case the platform can't be recognized
+ */
 platform_t platform_detect();
 
 /* Stuff below constitutes utilities loosely associated with the main

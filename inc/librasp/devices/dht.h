@@ -27,7 +27,7 @@ typedef enum _dht_model_t {
 
 /* Probe DHT sensor of a given model for temperature/humidity (written into
    'p_rh' and 'p_temp' respectively). Humidity is an unsigned 0-100 integer
-   (denoted in percentages); temperature - signed integer denoted in celsius.
+   (denoted in percentages); temperature - signed integer denoted in Celsius.
    Both temperature and humidity values are scaled by 10 multiplier. GPIO and
    clock handlers are required to perform the probe.
 
@@ -44,7 +44,7 @@ lr_errc_t dht_probe(gpio_hndl_t *p_gpio_h, clock_hndl_t *p_clk_h,
 
 /* Due to the significant number of erroneous probes (insufficient timings which
    can be obtained on the userland level), the function enables to specify a
-   number of probe retries until the error will be reported.
+   number of probe retries until an error will be reported.
  */
 lr_errc_t dht_probe_retried(gpio_hndl_t *p_gpio_h, clock_hndl_t *p_clk_h,
     unsigned int gpio, dht_model_t model, unsigned int n_retries,

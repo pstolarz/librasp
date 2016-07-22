@@ -35,15 +35,15 @@ typedef struct _spi_hndl_t
 } spi_hndl_t;
 
 /* Initialize SPI handle and write it under 'p_hndl'.
-   SPI_USE_DEF may be used for all params to use default values:
-       dev no: 0,
-       CS no: 0,
-       mode: 0,
-       LSB first: FALSE,
-       bits/word: 8,
-       speed: 1MHz,
-       delay: 0 us,
-       CS change: FALSE.
+   SPI_USE_DEF may be used for all params to use default values as follows:
+       dev no:      0,
+       CS no:       0,
+       mode:        0,
+       LSB first:   FALSE,
+       bits/word:   8,
+       speed:       1MHz,
+       delay:       0 us,
+       CS change:   FALSE.
  */
 lr_errc_t spi_init(spi_hndl_t *p_hndl, int dev_no, int cs_no,
     int mode, bool_t lsb_first, int bits_per_word, unsigned speed_hz,

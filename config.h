@@ -10,7 +10,7 @@
    userland is problematic and may lead to unexpected results. */
 #undef CONFIG_BCM_GPIO_EVENTS
 
-/* 1-wire write w/ pullup support; requires "wire" kernel module patch. */
+/* 1-wire write with pullup support; requires "wire" kernel module patch. */
 #undef CONFIG_WRITE_PULLUP
 
 #endif /* __CONFIG_H__ */

@@ -19,7 +19,7 @@
 extern "C" {
 #endif
 
-/* Read PISO shift register input bits (in number of 'n_dta_bits') and write the
+/* Read PISO shift register input bits (in amount of 'n_dta_bits') and write the
    result under 'p_dta' in the following order: 1st input: 0-bit of p_dta[0];
    2nd input: 1-bit of p_dta[0], ..., 8th input: 0bit of p_dta[1], etc. GPIOs
    pins for SH/~LD, CLK and the retrieved data pin (shift register output: Q or

@@ -213,7 +213,7 @@ lr_errc_t gpio_direction_output(
         gpio_bcm_set_func(p_hndl, gpio, gpio_bcm_out);
     } else {
         /* sysfs prevents setting a GPIO value before
-           declaring its direction as output */
+           declaring its direction as an output */
         if ((ret=sysfs_set_direction(p_hndl, gpio, TRUE))==LREC_SUCCESS)
             ret = gpio_set_value(p_hndl, gpio, val);
     }

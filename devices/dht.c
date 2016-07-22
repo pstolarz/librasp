@@ -24,7 +24,7 @@
 #define DHT_DTA_BITS    40U
 
 
-/* dht_probe() with flag indicating if the probe is retried or not.
+/* dht_probe() with a flag indicating if the probe is retried or not.
  */
 static lr_errc_t __dht_probe(
     gpio_hndl_t *p_gpio_h, clock_hndl_t *p_clk_h, unsigned int gpio,

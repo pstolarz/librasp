@@ -46,10 +46,10 @@ lr_errc_t clock_init(clock_hndl_t *p_hndl, clock_driver_t drv);
 /* Activate clock driver for (already initialized) handle. Any subsequent clock
    API calls will be performed in a context of this driver.
 
-   This function always success for SYS driver (if configured of course). For
-   I/O driver may for the first-time call on I/O mapping error (LREC_MMAP_ERR).
-   Once successes it will always success for the subsequent I/O driver
-   activations.
+   This function always success for SYS driver (if configured of course).
+   For I/O driver may fail for the first-time call on I/O mapping error
+   (LREC_MMAP_ERR). Once successes it will always success for the subsequent
+   I/O driver activations.
  */
 lr_errc_t clock_set_driver(clock_hndl_t *p_hndl, clock_driver_t drv);
 
@@ -61,10 +61,10 @@ void clock_free(clock_hndl_t *p_hndl);
    the 32-bit counterpart and should be avoided for time critical operations.
 
    Operation performed by the functions and its result depends on the active
-   driver set:
+   driver already set:
    - For the I/O driver the functions always success,
    - If configured the function may fail for the SYS driver if the underlying
-     system function failed.
+     system function fails.
  */
 lr_errc_t clock_get_ticks32(clock_hndl_t *p_hndl, uint32_t *p_ticks);
 lr_errc_t clock_get_ticks64(clock_hndl_t *p_hndl, uint64_t *p_ticks);
@@ -72,10 +72,10 @@ lr_errc_t clock_get_ticks64(clock_hndl_t *p_hndl, uint64_t *p_ticks);
 /* Sleep at least 'usec'.
 
    Operation performed by the function and its result depends on the active
-   driver set:
+   driver already set:
    - For the I/O driver the functions always success,
    - If configured the function may fail for the SYS driver if the underlying
-     system function failed.
+     system function fails.
  */
 lr_errc_t clock_usleep(clock_hndl_t *p_hndl, uint32_t usec);
 

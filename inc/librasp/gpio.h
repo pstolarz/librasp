@@ -48,27 +48,27 @@ typedef struct _gpio_hndl_t
  */
 lr_errc_t gpio_init(gpio_hndl_t *p_hndl, gpio_driver_t drv);
 
-/* Activate GPIO driver for (already initialized) handle. Any subsequent GPIO API
-   calls will be performed in a context of this driver.
+/* Activate GPIO driver for (already initialized) handle. Any subsequent GPIO
+   API calls will be performed in a context of this driver.
 
-   This function always success for SYSFS driver. For I/O driver may for the
-   first-time call on I/O mapping error (LREC_MMAP_ERR). Once successes it will
-   always success for the subsequent I/O driver activations.
+   This function always successes for SYSFS driver. For I/O driver may fail for
+   the first-time call on I/O mapping error (LREC_MMAP_ERR). Once successes it
+   will always success for the subsequent I/O driver activations.
  */
 lr_errc_t gpio_set_driver(gpio_hndl_t *p_hndl, gpio_driver_t drv);
 
-/* Free the GPIO handle.
+/* Free GPIO handle.
 
    NOTE: The function doesn't unexport exported GPIOs for the SYSFS driver. It
-   need to be done via gpio_sysfs_unexport() function.
+   need to be done via gpio_sysfs_unexport().
  */
 void gpio_free(gpio_hndl_t *p_hndl);
 
-/* Set GPIO as an input/output with initial value 'val' for the output.
+/* Set GPIO as an input/output with an initial value 'val' for the output.
 
    Operation performed by the functions and its result depends on the active
-   driver set:
-   - For the I/O driver the functions always success,
+   driver already set:
+   - For I/O driver the functions always success,
    - For SYSFS driver the function may fail if the requested GPIO has not been
      exported or due to sysfs access error.
 
@@ -79,16 +79,15 @@ lr_errc_t gpio_direction_input(gpio_hndl_t *p_hndl, unsigned int gpio);
 lr_errc_t gpio_direction_output(
     gpio_hndl_t *p_hndl, unsigned int gpio, unsigned int val);
 
-/* Get/set GPIO value (0|1).
+/* Get/set GPIO value (0 or 1).
 
    Operation performed by the functions and its result depends on the active
-   driver set:
-   - For the I/O driver the functions always success,
+   driver already set:
+   - For I/O driver the functions always success,
    - For SYSFS driver the function may fail if the requested GPIO has not been
-     set as input or output (LREC_NOINIT) or due to sysfs access error.
+     set as an input or output (LREC_NOINIT) or due to sysfs access error.
 
-   NOTE: For BCM chip the GPIO high/low output values are represented by 3.3V
-   voltage source OR shorting to the ground of a GPIO pin. Open-drain/source
+   NOTE: For BCM chip the GPIO outputs are of push-pull type. Open-drain/source
    outputs may be emulated by proper pull up/down resistor configuration
    (connection) and gpio_opndrn_set_value(), gpio_opnsrc_set_value() macros
    usage.
@@ -99,18 +98,18 @@ lr_errc_t gpio_set_value(
     gpio_hndl_t *p_hndl, unsigned int gpio, unsigned int val);
 
 /* Emulate open-drain output. In the high state the GPIO pin is configured as
-   input and may be read.
-   NOTE: Open drain emulation may be performed only for inputs with pull-up
-   resistor connected (by configuration or physically).
+   an input and may be read.
+   NOTE: Open drain emulation may be performed only with a pull-up resistor
+   connected (by configuration or physically).
  */
 #define gpio_opndrn_set_value(hndl, gpio, val) \
     ((val)&1 ? gpio_direction_input((hndl), (gpio)) : \
     gpio_direction_output((hndl), (gpio), 0))
 
 /* Emulate open-source output. In the low state the GPIO pin is configured as
-   input and may be read.
-   NOTE: Open source emulation may be performed only for inputs with pull-down
-   resistor connected (by configuration or physically).
+   an input and may be read.
+   NOTE: Open source emulation may be performed only with a pull-down resistor
+   connected (by configuration or physically).
  */
 #define gpio_opnsrc_set_value(hndl, gpio, val) \
     (!((val)&1) ? gpio_direction_input((hndl), (gpio)) : \
@@ -130,16 +129,16 @@ lr_errc_t gpio_set_value(
    GPIO_EVENT_XXX values). If the bit field is 0 event detection is turned off.
 
    Operation performed by the function and its result depends on the active
-   driver set:
-   - If configured the function always successes for the I/O driver.
+   driver already set:
+   - If configured the function always successes for I/O driver.
    - For SYSFS driver the function may fail if the requested GPIO has not been
      exported or due to sysfs access error.
  */
 lr_errc_t gpio_set_event(
     gpio_hndl_t *p_hndl, unsigned int gpio, unsigned int event);
 
-/* Get BCM's event status (1: event detected, 0: event not detected) for
-   a given GPIO.
+/* Get BCM's event status (1:event detected, 0:event not detected) for a given
+   GPIO.
 
    NOTE: If configured the function requires initialized I/O driver, which means
    gpio_set_driver() must be previously called for this driver (but the driver
@@ -192,10 +191,10 @@ typedef enum _gpio_pull_t
 lr_errc_t gpio_bcm_set_pull_config(
     gpio_hndl_t *p_hndl, unsigned int gpio, gpio_pull_t pull);
 
-/* These functions exports/unexports a GPIO for the SYSFS driver. Any GPIO MUST
-   be exported via gpio_sysfs_export() before its usage with SYSFS driver.
-   If the GPIO is no more needed library user should call gpio_sysfs_unexport()
-   to return the GPIO sysfs resource to the system.
+/* Export/unexport a GPIO for the SYSFS driver. Any GPIO MUST be exported via
+   gpio_sysfs_export() before its usage with SYSFS driver. If the GPIO is no
+   more needed a library user should call gpio_sysfs_unexport() to return the
+   GPIO sysfs resource to the system.
  */
 lr_errc_t gpio_sysfs_export(gpio_hndl_t *p_hndl, unsigned int gpio);
 lr_errc_t gpio_sysfs_unexport(gpio_hndl_t *p_hndl, unsigned int gpio);

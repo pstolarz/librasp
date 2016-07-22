@@ -65,7 +65,7 @@ lr_errc_t dsth_read_pow_supply(
     w1_hndl_t *p_w1_h, w1_slave_id_t therm, bool_t *p_is_paras);
 lr_errc_t dsth_convert_t(
     w1_hndl_t *p_w1_h, w1_slave_id_t therm, void *p_status, size_t stat_len);
-/* library must be configured to support this function (CONFIG_WRITE_PULLUP) */
+/* the lib must be configured to support this function (CONFIG_WRITE_PULLUP) */
 lr_errc_t dsth_convert_t_with_pullup(
     w1_hndl_t *p_w1_h, w1_slave_id_t therm, unsigned int pullup);
 lr_errc_t dsth_read_scratchpad(
@@ -79,7 +79,7 @@ lr_errc_t dsth_recall_eeprom(
     w1_hndl_t *p_w1_h, w1_slave_id_t therm, uint8_t *p_status);
 
 /* Functions below perform the same actions as their counterparts above but
-   for all devices connected to the master bus.
+   for all devices connected to the bus controlled by a master.
  */
 lr_errc_t dsth_convert_t_all(w1_hndl_t *p_w1_h, w1_master_id_t master);
 lr_errc_t dsth_convert_t_with_pullup_all(
@@ -101,7 +101,7 @@ typedef enum _dsth_res_t {
 
 #define DSTH_CONV_T_12BIT       750U
 
-/* Returns conversion time (msec) for given resolution */
+/* Returns conversion time (msec) for a given resolution */
 #define dsth_get_conv_time(res) \
     (DSTH_CONV_T_12BIT >> (3-(((unsigned int)(res))%4)))
 
@@ -109,20 +109,20 @@ typedef enum _dsth_res_t {
 #define COPY_SCRATCHPAD_PULLUP  10U
 
 /* Get/set therm resolution for a single therm.
-   The resolution is set be fetching current config, modifying it and writing
-   back to a device.
+   The resolution is set by fetching the current configuration, modifying it
+   and writing back to the device.
  */
 lr_errc_t dsth_get_res(w1_hndl_t *p_w1_h, w1_slave_id_t therm, dsth_res_t *p_res);
 lr_errc_t dsth_set_res(w1_hndl_t *p_w1_h, w1_slave_id_t therm, dsth_res_t res);
 
-/* Function fetching temperature value from the scratchpad (previously obtained
-   by dsth_read_scratchpad()). The temperature value depends on the thermometer
-   resolution 'res' (may be obtained by dsth_get_res()). The value is scaled by
-   1000.
+/* The function fetches temperature value from the scratchpad (previously
+   obtained by dsth_read_scratchpad()). The temperature value encoding depends
+   on the thermometer's resolution 'res' (may be obtained by dsth_get_res()).
+   The value is scaled by 1000.
 
-   Since the temperature encoding in the scratchpad may depend on therm type
-   (at this moment it doesn't), 'thrm_typ' is reserved for the future use,
-   pass 0 there.
+   Since the temperature encoding in the scratchpad may depend on the therm
+   type (at this moment it doesn't), 'thrm_typ' is reserved for the future use.
+   Pass 0 there.
  */
 int dsth_get_temp_scratchpad(
     const dsth_scratchpad_t *p_scpd, dsth_res_t res, int thrm_typ);

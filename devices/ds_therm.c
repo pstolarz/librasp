@@ -29,7 +29,7 @@ static uint8_t crc8(const void *p_in, size_t len)
     return crc;
 }
 
-/* Execute command for a given slave 'slv'. Bus probing may be performed after
+/* Execute a command for a given slave 'slv'. Bus probing may be performed after
    the execution.
  */
 static lr_errc_t exec_cmd(w1_hndl_t *p_w1_h, w1_slave_id_t slv,
@@ -56,7 +56,7 @@ finish:
 
 #ifdef CONFIG_WRITE_PULLUP
 /* Execute 1-byte length command 'cmd' (w/o following args) for a given slave
-   'slv' with strong pull-up time following the execution. Due to command
+   'slv' with strong pull-up time following the execution. Due to the command
    character no bus probing is performed.
  */
 lr_errc_t exec_cmd_pullup(
@@ -75,9 +75,9 @@ lr_errc_t exec_cmd_pullup(
 }
 #endif
 
-/* Execute command for all slaves connected to a 'master' bus. Due to command
-   character no bus probing is performed. Optional strong pull-up time may be
-   requested for command execution.
+/* Execute a command for all slaves connected to a 'master' bus. Due to the
+   command character no bus probing is performed. Optional strong pull-up time
+   may be requested for the command execution.
  */
 static lr_errc_t exec_cmd_all(w1_hndl_t *p_w1_h, w1_master_id_t master,
     const void *p_cmd, size_t cmd_len, bool_t has_pullup, unsigned int pullup)

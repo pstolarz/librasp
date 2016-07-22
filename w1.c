@@ -75,29 +75,33 @@ typedef enum _w1msg_more_stat_t
 {
     w1msg_no_more=0,    /* no more messages required */
     w1msg_more_req,     /* more message(s) required */
-    w1msg_more_opt      /* more message(s) may may be provided but no required */
+    w1msg_more_opt      /* more message(s) may be provided but not required */
 } w1msg_more_stat_t;
 
 /* The callback function prototype called by recv_w1msg() for each received w1
    message.
-   1st arg: private data passed by recv_w1msg() untouched,
-   2nd arg: received w1 message; it's guaranteed the message corresponds to the
-            request message, therefore the callback need not to check the message
-            against such correctness,
-   3rd arg: If TRUE the message contains execution status of the sent message.
-            Due to the COMPLETE MESS in the w1 netlink kernel code, some messages
-            are acknowledged by their statuses only if an error occurs (like
-            W1_LIST_MASTERS), for other the status is always reported. Moreover
-            the behaviour is kernel specific and for some kernels (e.g. =<3.12)
-            the messages status is always sent regardless of an error or success
-            (which is documentation compliant btw). To handle this mess it seems
-            to be feasible to assume success of the command unless the status
-            will be reported, in which case there is a need to check if it is
-            error or not.
+
+   p_cb_priv_dta: private data passed by recv_w1msg() untouched,
+
+   p_w1msg: received w1 message; it's guaranteed the message corresponds to
+       the request message, therefore the callback need not to check the message
+       against such correctness,
+
+   is_status: If TRUE the message contains execution status of the sent message.
+       Due to the COMPLETE MESS in the w1 netlink kernel code, some messages
+       are acknowledged by their statuses only if an error occurs (like
+       W1_LIST_MASTERS), for other the status is always reported. Moreover
+       the behaviour is kernel specific and for some kernels (e.g. =<3.12)
+       the message status is always sent regardless of an error or success
+       (which is documentation compliant BTW). To handle this mess it seems
+       to be feasible to assume success of the command unless the status
+       will be reported, in which case there is a need to check if it is an
+       error or not.
+
    Callback function returns "more message(s)" status (w1msg_more_stat_t).
  */
-typedef w1msg_more_stat_t
-    (*recv_w1msg_cb_t)(void*, const struct w1_netlink_msg*, bool_t);
+typedef w1msg_more_stat_t (*recv_w1msg_cb_t)(
+    void *p_cb_priv_dta, const struct w1_netlink_msg *p_w1msg, bool_t is_status);
 
 /* Receive w1 response(s) corresponding to a request 'p_req' and callback them
    by recv_cb().
@@ -322,7 +326,7 @@ finish:
     return ret;
 }
 
-/* Send single w1 netlink message */
+/* Send a single w1 netlink message */
 static lr_errc_t send_recv_w1msg(w1_hndl_t *p_hndl,
     const struct w1_netlink_msg *p_w1msg, recv_w1msg_cb_t recv_cb,
     void *p_cb_priv_dta)
@@ -358,7 +362,7 @@ static lr_errc_t send_recv_w1msg(w1_hndl_t *p_hndl,
     p_cnmsg->id.idx = CN_W1_IDX;
     p_cnmsg->id.val = CN_W1_VAL;
     p_cnmsg->seq = p_nlmsg->nlmsg_seq;
-    /* specific ack value used for distinguish status msg between responded msgs */
+    /* specific ack value used to distinguish status msg from response msgs */
     p_cnmsg->ack = ACK_STAT_VAL;
     p_cnmsg->len = w1msg_len;
     memcpy(p_cnmsg->data, p_w1msg, w1msg_len);
@@ -440,11 +444,11 @@ finish:
 
 typedef struct _list_cb_dta_t
 {
-    /* in: size of single list element (in bytes) */
+    /* in: size of a single list element (in bytes) */
     size_t elem_sz;
     /* out; pointer to receiving list buffer; must be initialized to the out buf */
     void *p_list;
-    /* in; capacity of list buffer in number of its elements */
+    /* in; capacity of the list buffer in number of its elements */
     size_t max_elems;
     /* out; number of list's elements written to it; must be initialized to 0 */
     size_t n_elems;
@@ -452,7 +456,7 @@ typedef struct _list_cb_dta_t
     size_t n_recv_elems;
     /* out; must be initialized to 0 */
     uint8_t status;
-    /* in: search command used for list slaves (ignored for masters) */
+    /* in: search command used for listing slaves (ignored for masters) */
     uint8_t srch_cmd;
 } list_cb_dta_t;
 
@@ -591,7 +595,7 @@ check_next_exec_cmd:
         } else
             p_cb_dta->cmd_msgs++;
 
-        /* copy outcome data content */
+        /* copy the outcome data content */
         if (IS_RESP_REQUIRED(p_w1cmd_exec->type) && p_w1cmd->len>0)
         {
             if ((p_w1cmd->len != p_w1cmd_exec->len) ||
