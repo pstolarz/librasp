@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015 Piotr Stolarz
+   Copyright (c) 2015,2016 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 
     /* set pull-up resistor (it's possible via I/O driver only) */
     EXEC_G(gpio_init(&gpio_h, gpio_drv_io));
-    gpio_bcm_set_pull_config(&gpio_h, GPIO_IN, gpio_pull_up);
+    gpio_bcm_set_pull_config(&gpio_h, GPIO_IN, gpio_bcm_pull_up);
     h_init = TRUE;
 
     /* switch to SYSFS driver */

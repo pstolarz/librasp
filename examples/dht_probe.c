@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015 Piotr Stolarz
+   Copyright (c) 2015,2016 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -24,7 +24,7 @@ struct
 {
     dht_model_t model;
     unsigned int gpio;
-    gpio_pull_t pull;
+    gpio_bcm_pull_t pull;
     unsigned int n_retries;
     bool_t verbose;
 } config =
@@ -32,7 +32,7 @@ struct
     /* default configuration */
     .model = (dht_model_t)-1,
     .gpio = (unsigned int)-1,
-    .pull = (gpio_pull_t)-1,
+    .pull = (gpio_bcm_pull_t)-1,
     .n_retries = (unsigned int)-1,
     .verbose = FALSE
 };
@@ -78,9 +78,9 @@ static bool_t get_config(int argc, char **argv)
 
             case 'p':   /* pull config */
                 if (cfg_provided.pull || prm_len!=3) goto finish;
-                if (prm[2]=='u') config.pull=gpio_pull_up;
+                if (prm[2]=='u') config.pull=gpio_bcm_pull_up;
                 else
-                if (prm[2]=='o') config.pull=gpio_pull_off;
+                if (prm[2]=='o') config.pull=gpio_bcm_pull_off;
                 else goto finish;
                 cfg_provided.pull++;
                 break;
@@ -152,11 +152,11 @@ int main(int argc, char **argv)
     if (config.verbose) {
         printf("CONFIG: gpio:%u, model:%s, verbose:%u, retries:%u, pull:%s\n",
             config.gpio, (config.model==dht11 ? "DHT11" : "DHT22"),
-            config.verbose, config.n_retries, (config.pull==gpio_pull_up ?
-                "up" : (config.pull==gpio_pull_off ? "off" : "n/a")));
+            config.verbose, config.n_retries, (config.pull==gpio_bcm_pull_up ?
+                "up" : (config.pull==gpio_bcm_pull_off ? "off" : "n/a")));
     }
 
-    if (config.pull!=(gpio_pull_t)-1) {
+    if (config.pull!=(gpio_bcm_pull_t)-1) {
         gpio_bcm_set_pull_config(&gpio_h, config.gpio, config.pull);
     }
 

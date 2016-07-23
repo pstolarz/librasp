@@ -68,7 +68,8 @@ void gpio_free(gpio_hndl_t *p_hndl);
 
    Operation performed by the functions and its result depends on the active
    driver already set:
-   - For I/O driver the functions always success,
+   - For I/O driver the functions always success (provided a proper GPIO number
+     was passed),
    - For SYSFS driver the function may fail if the requested GPIO has not been
      exported or due to sysfs access error.
 
@@ -83,7 +84,8 @@ lr_errc_t gpio_direction_output(
 
    Operation performed by the functions and its result depends on the active
    driver already set:
-   - For I/O driver the functions always success,
+   - For I/O driver the functions always success (provided a proper GPIO number
+     was passed),
    - For SYSFS driver the function may fail if the requested GPIO has not been
      set as an input or output (LREC_NOINIT) or due to sysfs access error.
 
@@ -130,7 +132,8 @@ lr_errc_t gpio_set_value(
 
    Operation performed by the function and its result depends on the active
    driver already set:
-   - If configured the function always successes for I/O driver.
+   - If configured the function always successes for I/O driver (provided
+     a proper GPIO number was passed).
    - For SYSFS driver the function may fail if the requested GPIO has not been
      exported or due to sysfs access error.
  */
@@ -159,6 +162,8 @@ typedef enum _gpio_bcm_func_t
     gpio_bcm_alt1,  /* 0b101 */
     gpio_bcm_alt2,  /* 0b110 */
     gpio_bcm_alt3,  /* 0b111 */
+
+    gpio_bcm_func_max=gpio_bcm_alt3
 } gpio_bcm_func_t;
 
 /* Get/set BCM's function assigned to a GPIO.
@@ -174,12 +179,14 @@ lr_errc_t gpio_bcm_set_func(
     gpio_hndl_t *p_hndl, unsigned int gpio, gpio_bcm_func_t func);
 
 /* BCM's GPIO input pull resistor configuration */
-typedef enum _gpio_pull_t
+typedef enum _gpio_bcm_pull_t
 {
-    gpio_pull_off=0,  /* 0b00 */
-    gpio_pull_down,   /* 0b01 */
-    gpio_pull_up      /* 0b10 */
-} gpio_pull_t;
+    gpio_bcm_pull_off=0,  /* 0b00 */
+    gpio_bcm_pull_down,   /* 0b01 */
+    gpio_bcm_pull_up,     /* 0b10 */
+
+    gpio_bcm_pull_max=gpio_bcm_pull_up
+} gpio_bcm_pull_t;
 
 /* Set pull resistor configuration for BCM's GPIO.
 
@@ -189,7 +196,7 @@ typedef enum _gpio_pull_t
    returned.
  */
 lr_errc_t gpio_bcm_set_pull_config(
-    gpio_hndl_t *p_hndl, unsigned int gpio, gpio_pull_t pull);
+    gpio_hndl_t *p_hndl, unsigned int gpio, gpio_bcm_pull_t pull);
 
 /* Export/unexport a GPIO for the SYSFS driver. Any GPIO MUST be exported via
    gpio_sysfs_export() before its usage with SYSFS driver. If the GPIO is no

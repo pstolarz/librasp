@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015 Piotr Stolarz
+   Copyright (c) 2015,2016 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -32,12 +32,12 @@ int main(int argc, char **argv, char **envp)
     if (!(gpio_inited=(gpio_init(&gpio_h, gpio_drv_io)==LREC_SUCCESS)) ||
         !(clk_inited=(clock_init(&clk_h, clock_drv_io)==LREC_SUCCESS)))
         goto finish;
- 
+
     gpio_direction_output(&gpio_h, GPIO_TRIG, 0);
 
     gpio_direction_input(&gpio_h, GPIO_ECHO);
-    gpio_bcm_set_pull_config(&gpio_h, GPIO_ECHO, gpio_pull_off);
- 
+    gpio_bcm_set_pull_config(&gpio_h, GPIO_ECHO, gpio_bcm_pull_off);
+
     for (;;) {
         if (hcsr_probe(&gpio_h, &clk_h,
             GPIO_TRIG, GPIO_ECHO, &dist_cm)!=LREC_SUCCESS) break;

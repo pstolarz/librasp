@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015 Piotr Stolarz
+   Copyright (c) 2015,2016 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -37,7 +37,7 @@ int main(int argc, char **argv)
     gpio_direction_output(&gpio_h, GPIO_OUT, 0);
 
     gpio_direction_input(&gpio_h, GPIO_IN);
-    gpio_bcm_set_pull_config(&gpio_h, GPIO_IN, gpio_pull_up);
+    gpio_bcm_set_pull_config(&gpio_h, GPIO_IN, gpio_bcm_pull_up);
 
     for (i=0; ;i=(i+1)%1000)
     {

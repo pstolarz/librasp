@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015 Piotr Stolarz
+   Copyright (c) 2015,2016 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -38,7 +38,7 @@ int main(void)
         char hex[2*sizeof(dta)+4];
 
         shr_piso_gpio_init(&gpio_h, GPIO_SH_LD, GPIO_CLK, GPIO_DATA);
-        gpio_bcm_set_pull_config(&gpio_h, GPIO_DATA, gpio_pull_down);
+        gpio_bcm_set_pull_config(&gpio_h, GPIO_DATA, gpio_bcm_pull_down);
 
         shr_piso_read(&gpio_h, GPIO_SH_LD, GPIO_CLK, GPIO_DATA, INPUTS, dta);
 
