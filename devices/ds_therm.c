@@ -59,7 +59,7 @@ finish:
    'slv' with strong pull-up time following the execution. Due to the command
    character no bus probing is performed.
  */
-lr_errc_t exec_cmd_pullup(
+static lr_errc_t exec_cmd_pullup(
     w1_hndl_t *p_w1_h, w1_slave_id_t slv, uint8_t cmd, unsigned int pullup)
 {
     uint8_t cmd_buf[8];
@@ -250,8 +250,7 @@ lr_errc_t dsth_copy_scratchpad_with_pullup_all(
 }
 
 /* exported; see header for details */
-lr_errc_t dsth_recall_eeprom_all(
-    w1_hndl_t *p_w1_h, w1_master_id_t master, uint8_t *p_status)
+lr_errc_t dsth_recall_eeprom_all(w1_hndl_t *p_w1_h, w1_master_id_t master)
 {
     uint8_t cmd=RECALL_EEPROM;
     return exec_cmd_all(p_w1_h, master, &cmd, 1, FALSE, 0);
@@ -288,7 +287,7 @@ int dsth_get_temp_scratchpad(
 {
     int temp = ((int)(int8_t)p_scpd->temp_hsb << 8) | p_scpd->temp_lsb;
     /* remove undefined bits out */
-    temp = (temp>>(3-(unsigned int)res))<<(3-(unsigned int)res);
+    temp = (temp>>(3-((unsigned int)res&3)))<<(3-((unsigned int)res&3));
     temp = (temp*1000)>>4;
 
     return temp;

@@ -54,7 +54,7 @@ typedef struct _w1_cmd_t {
     w1_cmd_type type;
     size_t len;
     uint8_t *p_data;
-    /* reserved for extra data (depending on the command type) */
+    /* reserved for an extra data (depending on the command type) */
     w1_cmd_extra_dta_t extra;
 } w1_cmd_t;
 

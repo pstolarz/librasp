@@ -342,7 +342,7 @@ static lr_errc_t send_recv_w1msg(w1_hndl_t *p_hndl,
     nlmsg_len = NLMSG_LENGTH(sizeof(struct cn_msg)+w1msg_len);
 
     if (NLMSG_ALIGN(nlmsg_len) > sizeof(send_buf)) {
-        err_printf("[%s] W1 message too long (%d vs %d)\n",
+        err_printf("[%s] w1 message too long (%d vs %d)\n",
             __func__, NLMSG_ALIGN(nlmsg_len), sizeof(send_buf));
         ret=LREC_MSG_SIZE;
         goto finish;
@@ -516,7 +516,7 @@ static w1msg_more_stat_t search_slavs_cb(
             p_cb_dta->status = -ENOMSG;
             ret = w1msg_no_more;
 
-            err_printf("[%s] W1 command [%d] not match searching command [%d]\n",
+            err_printf("[%s] w1 command [%d] not match searching command [%d]\n",
                 __func__, p_w1cmd->cmd, p_cb_dta->srch_cmd);
             goto finish;
         }
@@ -605,7 +605,7 @@ check_next_exec_cmd:
                 p_cb_dta->status = -ENOMSG;
                 ret = w1msg_no_more;
 
-                err_printf("[%s] W1 command data content error\n", __func__);
+                err_printf("[%s] w1 command data content error\n", __func__);
                 goto finish;
             }
             memcpy(p_w1cmd_exec->p_data, p_w1cmd->data, p_w1cmd->len);
@@ -644,7 +644,7 @@ lr_errc_t list_w1_masters(
     EXEC_RG(send_recv_w1msg(p_hndl, &w1msg, list_masts_cb, &cb_dta));
 
     if (cb_dta.status) {
-        err_printf("[%s] W1 status error: 0x%02x\n", __func__, cb_dta.status);
+        err_printf("[%s] w1 status error: 0x%02x\n", __func__, cb_dta.status);
         ret=LREC_PROTO_ERR;
         goto finish;
     }
@@ -685,7 +685,7 @@ static lr_errc_t __search_slaves(w1_hndl_t *p_hndl, uint8_t srch_cmd,
     EXEC_RG(send_recv_w1msg(p_hndl, p_w1msg, search_slavs_cb, &cb_dta));
 
     if (cb_dta.status) {
-        err_printf("[%s] W1 status error: 0x%02x\n", __func__, cb_dta.status);
+        err_printf("[%s] w1 status error: 0x%02x\n", __func__, cb_dta.status);
         ret=LREC_PROTO_ERR;
         goto finish;
     }
@@ -861,7 +861,7 @@ lr_errc_t w1_msg_exec(w1_hndl_t *p_hndl, w1_msg_t *p_w1msg)
     msg_len = sizeof(struct w1_netlink_msg)+cmds_len;
 
     if (msg_len > sizeof(msg_buf)) {
-        err_printf("[%s] W1 message too long (%d vs %d)\n",
+        err_printf("[%s] w1 message too long (%d vs %d)\n",
             __func__, msg_len, sizeof(msg_buf));
         ret=LREC_MSG_SIZE;
         goto finish;
@@ -911,7 +911,7 @@ lr_errc_t w1_msg_exec(w1_hndl_t *p_hndl, w1_msg_t *p_w1msg)
     EXEC_RG(send_recv_w1msg(p_hndl, p_w1msg_nl, w1msg_exec_cb, &cb_dta));
 
     if (cb_dta.status) {
-        err_printf("[%s] W1 status error: 0x%02x\n", __func__, cb_dta.status);
+        err_printf("[%s] w1 status error: 0x%02x\n", __func__, cb_dta.status);
         ret=LREC_PROTO_ERR;
         goto finish;
     }

@@ -161,9 +161,7 @@ typedef enum _gpio_bcm_func_t
     gpio_bcm_alt0,  /* 0b100 */
     gpio_bcm_alt1,  /* 0b101 */
     gpio_bcm_alt2,  /* 0b110 */
-    gpio_bcm_alt3,  /* 0b111 */
-
-    gpio_bcm_func_max=gpio_bcm_alt3
+    gpio_bcm_alt3   /* 0b111 */
 } gpio_bcm_func_t;
 
 /* Get/set BCM's function assigned to a GPIO.
@@ -183,9 +181,7 @@ typedef enum _gpio_bcm_pull_t
 {
     gpio_bcm_pull_off=0,  /* 0b00 */
     gpio_bcm_pull_down,   /* 0b01 */
-    gpio_bcm_pull_up,     /* 0b10 */
-
-    gpio_bcm_pull_max=gpio_bcm_pull_up
+    gpio_bcm_pull_up      /* 0b10 */
 } gpio_bcm_pull_t;
 
 /* Set pull resistor configuration for BCM's GPIO.

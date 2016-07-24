@@ -89,8 +89,7 @@ lr_errc_t dsth_write_scratchpad_all(w1_hndl_t *p_w1_h,
 lr_errc_t dsth_copy_scratchpad_all(w1_hndl_t *p_w1_h, w1_master_id_t master);
 lr_errc_t dsth_copy_scratchpad_with_pullup_all(
     w1_hndl_t *p_w1_h, w1_master_id_t master, unsigned int pullup);
-lr_errc_t dsth_recall_eeprom_all(
-    w1_hndl_t *p_w1_h, w1_master_id_t master, uint8_t *p_status);
+lr_errc_t dsth_recall_eeprom_all(w1_hndl_t *p_w1_h, w1_master_id_t master);
 
 typedef enum _dsth_res_t {
     DSTH_RES_9BIT =0,

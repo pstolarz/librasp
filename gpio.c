@@ -131,17 +131,13 @@ lr_errc_t gpio_bcm_set_func(
     lr_errc_t ret=LREC_SUCCESS;
 
     CHK_GPIO_NUM(gpio);
-    if ((int)func<0 || (int)func>(int)gpio_bcm_func_max) {
-        ret=LREC_INV_ARG;
-        goto finish;
-    }
 
     if (p_hndl->io.p_gpio_io) {
         unsigned int shl = 3*(gpio%10);
         volatile uint32_t *p_gpfsel = IO_REG32_PTR(
             p_hndl->io.p_gpio_io, GPFSEL0+sizeof(uint32_t)*(gpio/10));
         *p_gpfsel = (volatile uint32_t)SET_BITFLD(
-            *p_gpfsel, (uint32_t)func<<shl, (uint32_t)7<<shl);
+            *p_gpfsel, ((uint32_t)func&7)<<shl, (uint32_t)7<<shl);
     } else
         ret=LREC_NOINIT;
 
@@ -412,10 +408,6 @@ lr_errc_t gpio_bcm_set_pull_config(
     lr_errc_t ret=LREC_SUCCESS;
 
     CHK_GPIO_NUM(gpio);
-    if ((int)pull<0 || (int)pull>(int)gpio_bcm_pull_max) {
-        ret=LREC_INV_ARG;
-        goto finish;
-    }
 
     if (p_hndl->io.p_gpio_io)
     {
@@ -425,7 +417,7 @@ lr_errc_t gpio_bcm_set_pull_config(
         uint32_t gpio_bit = (uint32_t)1<<(gpio&0x1f);
 
         /* set the required control signal */
-        *p_gppud = (uint32_t)pull;
+        *p_gppud = (uint32_t)pull%3;
         WAIT_CYCLES(150);
         /* clock the control signal into the GPIO pad */
         *p_gppudclk = gpio_bit;
