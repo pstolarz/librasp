@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015 Piotr Stolarz
+   Copyright (c) 2015,2016 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -30,7 +30,9 @@ static lr_logdst_t log_dest = LRLOGTO_STDOUT;
 static lr_loglev_t log_lev = LRLOG_ERR;
 
 /* exported; see header for details */
-void set_librasp_log_dest(lr_logdst_t dest) { log_dest=dest; }
+void set_librasp_log_dest(lr_logdst_t dest) {
+    log_dest = (dest==LRLOGTO_SYSLOG ? dest : LRLOGTO_STDOUT);
+}
 lr_logdst_t get_librasp_log_dest(void) { return log_dest; }
 
 /* exported; see header for details */
@@ -140,10 +142,7 @@ static void vstdlog(
 static void vprintf_log(
     lr_loglev_t lev, const char *format, va_list args)
 {
-    if (log_dest==LRLOGTO_STDOUT) {
-        vstdlog(lev, format, args);
-    } else
-    {
+    if (log_dest==LRLOGTO_SYSLOG) {
         int priority;
         switch (lev)
         {
@@ -162,6 +161,8 @@ static void vprintf_log(
             break;
         }
         vsyslog(priority, format, args);
+    } else {
+        vstdlog(lev, format, args);
     }
 }
 

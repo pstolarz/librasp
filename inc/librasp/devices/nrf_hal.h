@@ -9,7 +9,7 @@
  * the file.
  */
 /*
-   Copyright (c) 2015 Piotr Stolarz
+   Copyright (c) 2015,2016 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)

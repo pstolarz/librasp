@@ -44,6 +44,10 @@ lr_errc_t gpio_set_driver(gpio_hndl_t *p_hndl, gpio_driver_t drv)
 
     switch (drv)
     {
+    default:
+        drv = gpio_drv_io;
+        /* fall-through */
+
     case gpio_drv_io:
       {
         if (!p_hndl->io.p_gpio_io)
@@ -65,10 +69,6 @@ lr_errc_t gpio_set_driver(gpio_hndl_t *p_hndl, gpio_driver_t drv)
 
     case gpio_drv_sysfs:
         /* no initialization needed in this case */
-        break;
-
-    default:
-        ret=LREC_INV_ARG;
         break;
     }
 

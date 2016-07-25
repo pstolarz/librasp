@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015 Piotr Stolarz
+   Copyright (c) 2015,2016 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -37,6 +37,10 @@ lr_errc_t clock_set_driver(clock_hndl_t *p_hndl, clock_driver_t drv)
 
     switch (drv)
     {
+    default:
+        drv = clock_drv_io;
+        /* fall-through */
+
     case clock_drv_io:
       {
         if (!p_hndl->io.p_stc_io)
@@ -62,10 +66,6 @@ lr_errc_t clock_set_driver(clock_hndl_t *p_hndl, clock_driver_t drv)
 #else
         ret=LREC_NOT_SUPP;
 #endif
-        break;
-
-    default:
-        ret=LREC_INV_ARG;
         break;
     }
 
