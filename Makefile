@@ -20,23 +20,23 @@ clean:
 ./devices/devices.a: FORCE
 	$(MAKE) -C./devices
 
-config.h=config.h
-inc/librasp/bcm_platform.h=inc/librasp/bcm_platform.h
-inc/librasp/common.h=inc/librasp/common.h
-inc/librasp/clock.h=inc/librasp/clock.h
-inc/librasp/gpio.h=inc/librasp/gpio.h
-inc/librasp/spi.h=inc/librasp/spi.h
-inc/librasp/w1.h=inc/librasp/w1.h
-common.h=common.h $(config.h) $(inc/librasp/common.h)
-w1_netlink.h=w1_netlink.h
+# headers dependencies
+common.h: config.h inc/librasp/common.h
+inc/librasp/clock.h: inc/librasp/common.h inc/librasp/bcm_platform.h
+inc/librasp/gpio.h: inc/librasp/common.h inc/librasp/bcm_platform.h
+inc/librasp/spi.h: inc/librasp/common.h
+inc/librasp/w1.h: inc/librasp/common.h
 
-common.o: $(inc/librasp/bcm_platform.h)
-clock.o: $(inc/librasp/clock.h) $(inc/librasp/bcm_platform.h)
-gpio.o: $(inc/librasp/gpio.h) $(inc/librasp/bcm_platform.h)
-spi.o: $(inc/librasp/spi.h)
-w1.o: $(inc/librasp/w1.h) $(w1_netlink.h)
+%.h:
+	@touch -c $@
 
-%.o: %.c $(common.h)
+clock.o: common.h inc/librasp/clock.h
+common.o: common.h inc/librasp/bcm_platform.h
+gpio.o: common.h inc/librasp/gpio.h
+spi.o: common.h inc/librasp/spi.h
+w1.o: common.h w1_netlink.h inc/librasp/w1.h
+
+%.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 librasp.a: $(OBJS) ./devices/devices.a

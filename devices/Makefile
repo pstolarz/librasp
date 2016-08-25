@@ -15,23 +15,23 @@ all: devices.a
 clean:
 	rm -f devices.a $(OBJS)
 
-../config.h=../config.h
-../inc/librasp/common.h=../inc/librasp/common.h
-../inc/librasp/spi.h=../inc/librasp/spi.h
-../inc/librasp/devices/dht.h=../inc/librasp/devices/dht.h
-../inc/librasp/devices/hcsr04.h=../inc/librasp/devices/hcsr04.h
-../inc/librasp/devices/ds_therm.h=../inc/librasp/devices/ds_therm.h
-../inc/librasp/devices/shr_piso.h=../inc/librasp/devices/shr_piso.h
-../inc/librasp/devices/nrf_hal.h=../inc/librasp/devices/nrf_hal.h $(../inc/librasp/spi.h)
-../common.h=../common.h $(../config.h) $(../inc/librasp/common.h)
+# headers dependencies
+../inc/librasp/devices/dht.h: ../inc/librasp/gpio.h ../inc/librasp/clock.h
+../inc/librasp/devices/ds_therm.h: ../inc/librasp/w1.h
+../inc/librasp/devices/hcsr04.h: ../inc/librasp/gpio.h ../inc/librasp/clock.h
+../inc/librasp/devices/nrf_hal.h: ../inc/librasp/spi.h
+../inc/librasp/devices/shr_piso.h: ../inc/librasp/gpio.h
 
-dht.o: $(../inc/librasp/devices/dht.h)
-hcsr04.o: $(../inc/librasp/devices/hcsr04.h)
-ds_therm.o: $(../inc/librasp/devices/ds_therm.h)
-shr_piso.o: $(../inc/librasp/devices/shr_piso.h)
-nrf_hal.o: $(../inc/librasp/devices/nrf_hal.h)
+%.h:
+	@touch -c $@
 
-%.o: %.c $(../common.h)
+dht.o: ../common.h ../inc/librasp/devices/dht.h
+ds_therm.o: ../common.h ../inc/librasp/devices/ds_therm.h
+hcsr04.o: ../common.h ../inc/librasp/devices/hcsr04.h
+nrf_hal.o: ../inc/librasp/devices/nrf_hal.h
+shr_piso.o: ../common.h ../inc/librasp/devices/shr_piso.h
+
+%.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 devices.a: $(OBJS)
