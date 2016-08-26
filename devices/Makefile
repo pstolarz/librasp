@@ -1,5 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -I../inc -I..
+MAKEDEP=gcc $(CFLAGS) $< -MM -MT "$@ $*.o" -MF $@
 
 OBJS = \
     dht.o \
@@ -13,26 +14,17 @@ OBJS = \
 all: devices.a
 
 clean:
-	rm -f devices.a $(OBJS)
-
-# headers dependencies
-../inc/librasp/devices/dht.h: ../inc/librasp/gpio.h ../inc/librasp/clock.h
-../inc/librasp/devices/ds_therm.h: ../inc/librasp/w1.h
-../inc/librasp/devices/hcsr04.h: ../inc/librasp/gpio.h ../inc/librasp/clock.h
-../inc/librasp/devices/nrf_hal.h: ../inc/librasp/spi.h
-../inc/librasp/devices/shr_piso.h: ../inc/librasp/gpio.h
-
-%.h:
-	@touch -c $@
-
-dht.o: ../common.h ../inc/librasp/devices/dht.h
-ds_therm.o: ../common.h ../inc/librasp/devices/ds_therm.h
-hcsr04.o: ../common.h ../inc/librasp/devices/hcsr04.h
-nrf_hal.o: ../inc/librasp/devices/nrf_hal.h
-shr_piso.o: ../common.h ../inc/librasp/devices/shr_piso.h
+	rm -f devices.a $(OBJS) $(OBJS:.o=.d)
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 devices.a: $(OBJS)
 	ar rcs $@ $(OBJS)
+
+%.d: %.c
+	$(MAKEDEP)
+
+ifneq ($(MAKECMDGOALS),clean)
+-include $(OBJS:.o=.d)
+endif
