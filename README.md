@@ -12,6 +12,13 @@ examples look in `./examples`.
 
 Expect more sensors support in the future.
 
+Compilation
+-----------
+
+    make
+
+produces static library `librasp.a` which may be linked into an application.
+
 1-wire and parasite powering
 ----------------------------
 
