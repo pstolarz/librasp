@@ -37,8 +37,8 @@ lr_errc_t spi_init(spi_hndl_t *p_hndl, int dev_no, int cs_no,
     if (lsb_first==(bool_t)SPI_USE_DEF) lsb_first = FALSE;
     if (bits_per_word==SPI_USE_DEF) bits_per_word = 8;
     if (speed_hz==(unsigned)SPI_USE_DEF) speed_hz = 1000000;    /* 1MHz */
-    if (delay_us==(unsigned)SPI_USE_DEF) p_hndl->delay_us = 0;
-    if (cs_change==(bool_t)SPI_USE_DEF) p_hndl->cs_change = FALSE;
+    if (delay_us==(unsigned)SPI_USE_DEF) delay_us = 0;
+    if (cs_change==(bool_t)SPI_USE_DEF) cs_change = FALSE;
 
     sprintf(dev_name, "/dev/spidev%d.%d", dev_no, cs_no);
     p_hndl->fd = open(dev_name, O_RDWR);
@@ -52,8 +52,10 @@ lr_errc_t spi_init(spi_hndl_t *p_hndl, int dev_no, int cs_no,
 
     EXEC_RG(spi_set_mode(p_hndl, mode));
     EXEC_RG(spi_set_lsb(p_hndl, lsb_first));
-    EXEC_RG(spi_set_bits_per_word(p_hndl, bits_per_word));
-    EXEC_RG(spi_set_speed(p_hndl, speed_hz));
+    EXEC_RG(spi_set_bits_per_word(p_hndl, bits_per_word, TRUE));
+    EXEC_RG(spi_set_speed(p_hndl, speed_hz, TRUE));
+    spi_set_delay(p_hndl, delay_us);
+    spi_set_cs_change(p_hndl, cs_change);
 
 finish:
     if (ret!=LREC_SUCCESS) spi_free(p_hndl);
@@ -104,37 +106,43 @@ lr_errc_t spi_set_lsb(spi_hndl_t *p_hndl, bool_t lsb_first)
 }
 
 /* exported; see header for details */
-lr_errc_t spi_set_bits_per_word(spi_hndl_t *p_hndl, int bits_per_word)
+lr_errc_t spi_set_bits_per_word(
+    spi_hndl_t *p_hndl, int bits_per_word, bool_t with_ioctl)
 {
     lr_errc_t ret = LREC_SUCCESS;
     uint8_t u8 = (uint8_t)bits_per_word;
 
     p_hndl->bits_per_word = bits_per_word;
 
-    if(ioctl(p_hndl->fd, SPI_IOC_WR_BITS_PER_WORD, &u8)==-1 ||
-       ioctl(p_hndl->fd, SPI_IOC_RD_BITS_PER_WORD, &u8)==-1)
-    {
-        err_printf("[%s] ioctl() SPI BITS_PER_WORD error: %d; %s\n",
-            __func__, errno, strerror(errno));
-        ret = LREC_IOCTL_ERR;
+    if (with_ioctl) {
+        if(ioctl(p_hndl->fd, SPI_IOC_WR_BITS_PER_WORD, &u8)==-1 ||
+           ioctl(p_hndl->fd, SPI_IOC_RD_BITS_PER_WORD, &u8)==-1)
+        {
+            err_printf("[%s] ioctl() SPI BITS_PER_WORD error: %d; %s\n",
+                __func__, errno, strerror(errno));
+            ret = LREC_IOCTL_ERR;
+        }
     }
     return ret;
 }
 
 /* exported; see header for details */
-lr_errc_t spi_set_speed(spi_hndl_t *p_hndl, unsigned speed_hz)
+lr_errc_t spi_set_speed(
+    spi_hndl_t *p_hndl, unsigned speed_hz, bool_t with_ioctl)
 {
     lr_errc_t ret = LREC_SUCCESS;
     uint32_t u32 = (uint32_t)speed_hz;
 
     p_hndl->speed_hz = speed_hz;
 
-    if(ioctl(p_hndl->fd, SPI_IOC_WR_MAX_SPEED_HZ, &u32)==-1 ||
-       ioctl(p_hndl->fd, SPI_IOC_RD_MAX_SPEED_HZ, &u32)==-1)
-    {
-        err_printf("[%s] ioctl() SPI MAX_SPEED_HZ error: %d; %s\n",
-            __func__, errno, strerror(errno));
-        ret = LREC_IOCTL_ERR;
+    if (with_ioctl) {
+        if(ioctl(p_hndl->fd, SPI_IOC_WR_MAX_SPEED_HZ, &u32)==-1 ||
+           ioctl(p_hndl->fd, SPI_IOC_RD_MAX_SPEED_HZ, &u32)==-1)
+        {
+            err_printf("[%s] ioctl() SPI MAX_SPEED_HZ error: %d; %s\n",
+                __func__, errno, strerror(errno));
+            ret = LREC_IOCTL_ERR;
+        }
     }
     return ret;
 }
