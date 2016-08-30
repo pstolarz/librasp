@@ -9,7 +9,7 @@ OBJS = \
     spi.o \
     w1.o
 
-.PHONY: all clean FORCE
+.PHONY: all clean examples FORCE
 
 all: librasp.a
 
@@ -17,6 +17,9 @@ clean:
 	rm -f librasp.a $(OBJS) $(OBJS:.o=.d)
 	$(MAKE) -C./devices clean
 	$(MAKE) -C./examples clean
+
+examples:
+	$(MAKE) -C./examples
 
 ./devices/devices.a: FORCE
 	$(MAKE) -C./devices

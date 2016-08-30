@@ -19,6 +19,10 @@ Compilation
 
 produces static library `librasp.a` which may be linked into an application.
 
+    make examples
+
+will compile examples in `./examples`.
+
 1-wire and parasite powering
 ----------------------------
 
