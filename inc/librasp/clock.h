@@ -79,15 +79,6 @@ lr_errc_t clock_get_ticks64(clock_hndl_t *p_hndl, uint64_t *p_ticks);
  */
 lr_errc_t clock_usleep(clock_hndl_t *p_hndl, uint32_t usec);
 
-/* Sleep at least 'usec'.
-
-   NOTE: The function requires initialized I/O driver, which means
-   clock_set_driver() must be previously called for this driver (but the driver
-   need not to be active at the moment of call) otherwise LREC_NOINIT is
-   returned.
- */
-lr_errc_t clock_bcm_usleep(clock_hndl_t *p_hndl, uint32_t usec, uint32_t thrshd);
-
 #ifdef __cplusplus
 }
 #endif

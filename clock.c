@@ -151,37 +151,30 @@ lr_errc_t clock_get_ticks64(clock_hndl_t *p_hndl, uint64_t *p_ticks)
     return ret;
 }
 
-/* exported; see header for details */
-lr_errc_t clock_bcm_usleep(clock_hndl_t *p_hndl, uint32_t usec, uint32_t thrshd)
+/* BCM specific usec sleep implementation.
+ */
+static void bcm_usleep(clock_hndl_t *p_hndl, uint32_t usec, uint32_t thrshd)
 {
-    lr_errc_t ret=LREC_SUCCESS;
+    uint32_t ticks, stop, time;
 
-    if (p_hndl->io.p_stc_io)
+    ticks = get_bcm_clock_ticks_lo(p_hndl);
+    stop = ticks+usec;
+
+    for (time=0; time<usec;)
     {
-        uint32_t ticks, stop, time;
+        uint32_t delta;
 
-        ticks = get_bcm_clock_ticks_lo(p_hndl);
-        stop = ticks+usec;
-
-        for (time=0; time<usec;)
-        {
-            uint32_t delta;
-
-            if (stop-ticks >= thrshd) {
-                /* don't waste CPU time for long sleeps */
-                usleep((usec-time)>>1);
-            }
-
-            delta = get_bcm_clock_ticks_lo(p_hndl)-ticks;
-            if (delta) {
-                time = (time+delta<time ? (uint32_t)-1 : time+delta);
-                ticks += delta;
-            }
+        if (stop-ticks >= thrshd) {
+            /* don't waste CPU time for long sleeps */
+            usleep((usec-time)>>1);
         }
-    } else {
-        ret=LREC_NOINIT;
+
+        delta = get_bcm_clock_ticks_lo(p_hndl)-ticks;
+        if (delta) {
+            time = (time+delta<time ? (uint32_t)-1 : time+delta);
+            ticks += delta;
+        }
     }
-    return ret;
 }
 
 /* exported; see header for details */
@@ -190,7 +183,7 @@ lr_errc_t clock_usleep(clock_hndl_t *p_hndl, uint32_t usec)
     lr_errc_t ret=LREC_SUCCESS;
 
     if (p_hndl->drv==clock_drv_io) {
-        clock_bcm_usleep(p_hndl, usec, BCM_DEF_USLEEP_THRSHD);
+        bcm_usleep(p_hndl, usec, BCM_DEF_USLEEP_THRSHD);
     } else {
 #ifdef CONFIG_CLOCK_SYS_DRIVER
         if (usleep(usec)) {
