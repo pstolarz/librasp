@@ -745,9 +745,9 @@ uint8_t hal_nrf_read_reg(uint8_t reg)
 /**
  * Basis function write_reg.
  * Use this function to write a new value to a radio register.
- * @param reg Register to write
- * @param value New value to write
- * @return Status register
+ * @param reg Register to write.
+ * @param value New value to write.
+ * @return Status register.
  */
 static uint8_t hal_nrf_write_reg(uint8_t reg, uint8_t value)
 {
@@ -762,10 +762,10 @@ static uint8_t hal_nrf_write_reg(uint8_t reg, uint8_t value)
 /**
  * Basis function, read_multibyte register.
  * Use this function to read multiple bytes from a multibyte radio-register.
- * @param reg Multibyte register to read from
- * @param *pbuf Pointer to buffer in which to store read bytes to
+ * @param reg Multibyte register to read from.
+ * @param *pbuf Pointer to buffer in which to store read bytes to.
  * @return pipe# of received data (MSB), if operation used by
- * hal_nrf_read_rx_pload
+ * hal_nrf_read_rx_pload.
  * @return length of read data (LSB), either for hal_nrf_read_rx_pload or
  * for hal_nrf_get_address.
  */
@@ -812,10 +812,10 @@ finish:
 
 /**
  * Basis function, write_multibyte register.
- * Use this function to write multiple bytes to a multiple radio register.
- * @param reg Register to write
- * @param *pbuf pointer to buffer in which data to write is
- * @param length # of bytes to write
+ * Use this function to write multiple bytes to a multibyte radio register.
+ * @param reg Register to write.
+ * @param *pbuf pointer to buffer in which data to write is.
+ * @param length # of bytes to write.
  */
 static void hal_nrf_write_multibyte_reg(
     uint8_t reg, const uint8_t *pbuf, uint8_t length)
