@@ -35,7 +35,7 @@ typedef struct _spi_hndl_t
 } spi_hndl_t;
 
 /* Initialize SPI handle and write it under 'p_hndl'.
-   SPI_USE_DEF may be used for all params to use default values as follows:
+   SPI_USE_DEF may be used for any param to use its default value as follows:
        dev no:      0,
        CS no:       0,
        mode:        0,

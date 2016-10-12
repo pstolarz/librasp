@@ -91,7 +91,7 @@ int main(int argc, char **argv)
                     if (dsth_read_scratchpad(
                         &w1_h, p_slavs->ids[j], &scpd)==LREC_SUCCESS)
                     {
-                        int temp = dsth_get_temp_scratchpad(&scpd, DSTH_RES, 0);
+                        int temp = dsth_get_temp_scratchpad(&scpd);
                         printf("%d.%d\n", temp/1000, (temp%1000)*(temp<0 ? -1 : 1));
                     } else
                         printf("???\n");

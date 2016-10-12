@@ -282,12 +282,13 @@ finish:
 }
 
 /* exported; see header for details */
-int dsth_get_temp_scratchpad(
-    const dsth_scratchpad_t *p_scpd, dsth_res_t res, int thrm_typ)
+int dsth_get_temp_scratchpad(const dsth_scratchpad_t *p_scpd)
 {
     int temp = ((int)(int8_t)p_scpd->temp_hsb << 8) | p_scpd->temp_lsb;
+    unsigned int res = (p_scpd->cfg_reg>>5) & 3;
+
     /* remove undefined bits out */
-    temp = (temp>>(3-((unsigned int)res&3)))<<(3-((unsigned int)res&3));
+    temp = (temp>>(3-res))<<(3-res);
     temp = (temp*1000)>>4;
 
     return temp;
@@ -334,7 +335,7 @@ lr_errc_t dsth_probe(w1_hndl_t *p_w1_h, w1_slave_id_t therm, int *p_temp)
     dbg_printf("[%s] temp-lsb:0x%02x, temp-hsb:0x%02x\n",
         __func__, scpd.temp_lsb, scpd.temp_hsb);
 
-    *p_temp = dsth_get_temp_scratchpad(&scpd, res, 0);
+    *p_temp = dsth_get_temp_scratchpad(&scpd);
 finish:
     return ret;
 }

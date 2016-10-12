@@ -115,16 +115,9 @@ lr_errc_t dsth_get_res(w1_hndl_t *p_w1_h, w1_slave_id_t therm, dsth_res_t *p_res
 lr_errc_t dsth_set_res(w1_hndl_t *p_w1_h, w1_slave_id_t therm, dsth_res_t res);
 
 /* The function fetches temperature value from the scratchpad (previously
-   obtained by dsth_read_scratchpad()). The temperature value encoding depends
-   on the thermometer's resolution 'res' (may be obtained by dsth_get_res()).
-   The value is scaled by 1000.
-
-   Since the temperature encoding in the scratchpad may depend on the therm
-   type (at this moment it doesn't), 'thrm_typ' is reserved for the future use.
-   Pass 0 there.
+   obtained by dsth_read_scratchpad()). The value is scaled by 1000.
  */
-int dsth_get_temp_scratchpad(
-    const dsth_scratchpad_t *p_scpd, dsth_res_t res, int thrm_typ);
+int dsth_get_temp_scratchpad(const dsth_scratchpad_t *p_scpd);
 
 /* Probe a single therm for the temperature and write it under 'p_temp' (x1000).
  */
