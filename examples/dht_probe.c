@@ -139,7 +139,7 @@ int main(int argc, char **argv)
     gpio_hndl_t gpio_h;
     bool_t clk_inited=FALSE, gpio_inited=FALSE;
 
-    int temp;
+    int temp, temp_abs;
     unsigned int rh;
 
     if (!get_config(argc, argv) ||
@@ -164,8 +164,10 @@ int main(int argc, char **argv)
         config.gpio, config.model, config.n_retries, &rh, &temp))
     {
     case LREC_SUCCESS:
-        printf("T:%d.%d RH:%d.%d\n",
-            temp/10, (temp%10)*(temp<0 ? -1 : 1), rh/10, rh%10);
+        temp_abs = (temp>=0 ? temp : -temp);
+
+        printf("T:%s%d.%d RH:%d.%d\n",
+            (temp<0 ? "-" : ""), temp_abs/10, temp_abs%10, rh/10, rh%10);
         /* success */
         ret=0;
         break;

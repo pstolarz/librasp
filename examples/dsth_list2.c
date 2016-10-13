@@ -93,9 +93,10 @@ int main(int argc, char **argv)
                     {
                         int temp =
                             dsth_get_temp_scratchpad(p_slavs->ids[j], &scpd);
+                        int temp_abs = (temp>=0 ? temp : -temp);
 
-                        printf("%d.%d\n",
-                            temp/1000, (temp%1000)*(temp<0 ? -1 : 1));
+                        printf("%s%d.%03d\n",
+                            (temp<0 ? "-" : ""), temp_abs/1000, temp_abs%1000);
                     } else
                         printf("???\n");
                 }

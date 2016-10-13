@@ -67,8 +67,10 @@ int main(int argc, char **argv)
 #endif
                     if (dsth_probe(&w1_h, p_slavs->ids[j], &temp)==LREC_SUCCESS)
                     {
-                        printf("%d.%d\n",
-                            temp/1000, (temp%1000)*(temp<0 ? -1 : 1));
+                        int temp_abs = (temp>=0 ? temp : -temp);
+
+                        printf("%s%d.%03d\n",
+                            (temp<0 ? "-" : ""), temp_abs/1000, temp_abs%1000);
                     } else
                         printf("???\n");
                 }
