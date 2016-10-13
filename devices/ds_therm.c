@@ -166,11 +166,18 @@ lr_errc_t dsth_write_scratchpad(w1_hndl_t *p_w1_h,
     w1_slave_id_t therm, uint8_t th, uint8_t tl, uint8_t cfg_reg)
 {
     uint8_t cmd[4];
+    size_t cmd_len = sizeof(cmd);
+
     cmd[0]=WRITE_SCRATCHPAD;
     cmd[1]=th;
     cmd[2]=tl;
-    cmd[3]=cfg_reg;
-    return exec_cmd(p_w1_h, therm, cmd, sizeof(cmd), NULL, 0);
+
+    if (dsth_get_family(therm) != DS18S20)
+        cmd[3]=cfg_reg;
+    else
+        cmd_len--;
+
+    return exec_cmd(p_w1_h, therm, cmd, cmd_len, NULL, 0);
 }
 
 /* exported; see header for details */
@@ -231,6 +238,17 @@ lr_errc_t dsth_write_scratchpad_all(w1_hndl_t *p_w1_h,
 }
 
 /* exported; see header for details */
+lr_errc_t dsth_write_scratchpad_all_ds18s20(
+    w1_hndl_t *p_w1_h, w1_master_id_t master, uint8_t th, uint8_t tl)
+{
+    uint8_t cmd[3];
+    cmd[0]=WRITE_SCRATCHPAD;
+    cmd[1]=th;
+    cmd[2]=tl;
+    return exec_cmd_all(p_w1_h, master, cmd, sizeof(cmd), FALSE, 0);
+}
+
+/* exported; see header for details */
 lr_errc_t dsth_copy_scratchpad_all(w1_hndl_t *p_w1_h, w1_master_id_t master)
 {
     uint8_t cmd=COPY_SCRATCHPAD;
@@ -262,8 +280,11 @@ lr_errc_t dsth_get_res(w1_hndl_t *p_w1_h, w1_slave_id_t therm, dsth_res_t *p_res
     lr_errc_t ret=LREC_SUCCESS;
     dsth_scratchpad_t scpd;
 
-    EXEC_RG(dsth_read_scratchpad(p_w1_h, therm, &scpd));
-    *p_res = (dsth_res_t)((scpd.cfg_reg>>5)&3);
+    if (dsth_get_family(therm) != DS18S20) {
+        EXEC_RG(dsth_read_scratchpad(p_w1_h, therm, &scpd));
+        *p_res = (dsth_res_t)((scpd.cfg_reg>>5)&3);
+    } else
+        ret = DSTH_RES_12BIT;
 finish:
     return ret;
 }
@@ -274,22 +295,36 @@ lr_errc_t dsth_set_res(w1_hndl_t *p_w1_h, w1_slave_id_t therm, dsth_res_t res)
     lr_errc_t ret=LREC_SUCCESS;
     dsth_scratchpad_t scpd;
 
-    EXEC_RG(dsth_read_scratchpad(p_w1_h, therm, &scpd));
-    ret = dsth_write_scratchpad(p_w1_h, therm, scpd.th, scpd.tl,
-        SET_BITFLD(scpd.cfg_reg, ((uint8_t)res&3)<<5, (uint8_t)3<<5));
+    if (dsth_get_family(therm) != DS18S20) {
+        EXEC_RG(dsth_read_scratchpad(p_w1_h, therm, &scpd));
+        ret = dsth_write_scratchpad(p_w1_h, therm, scpd.th, scpd.tl,
+            SET_BITFLD(scpd.cfg_reg, ((uint8_t)res&3)<<5, (uint8_t)3<<5));
+    } else
+    if (res!=DSTH_RES_12BIT) ret=LREC_DEV_ERR;
+
 finish:
     return ret;
 }
 
 /* exported; see header for details */
-int dsth_get_temp_scratchpad(const dsth_scratchpad_t *p_scpd)
+int dsth_get_temp_scratchpad(
+    w1_slave_id_t therm, const dsth_scratchpad_t *p_scpd)
 {
     int temp = ((int)(int8_t)p_scpd->temp_hsb << 8) | p_scpd->temp_lsb;
-    unsigned int res = (p_scpd->cfg_reg>>5) & 3;
 
-    /* remove undefined bits out */
-    temp = (temp>>(3-res))<<(3-res);
-    temp = (temp*1000)>>4;
+    if (dsth_get_family(therm) != DS18S20) {
+        unsigned int res = (p_scpd->cfg_reg>>5) & 3;
+        temp = (temp>>(3-res))<<(3-res);  /* zeroed undefined bits */
+        temp = (temp*1000)/16;
+    } else
+    if (p_scpd->cnt_per_c) {
+        temp = 1000*(temp>>1) - 250;
+        temp += 1000*(p_scpd->cnt_per_c - p_scpd->cnt_rem) / p_scpd->cnt_per_c;
+    } else {
+        /* shall never happen */
+        temp = (temp*1000)/2;
+        warn_printf("[%s] Zeroed COUNT_PER_C detected!\n", __func__);
+    }
 
     return temp;
 }
@@ -335,7 +370,7 @@ lr_errc_t dsth_probe(w1_hndl_t *p_w1_h, w1_slave_id_t therm, int *p_temp)
     dbg_printf("[%s] temp-lsb:0x%02x, temp-hsb:0x%02x\n",
         __func__, scpd.temp_lsb, scpd.temp_hsb);
 
-    *p_temp = dsth_get_temp_scratchpad(&scpd);
+    *p_temp = dsth_get_temp_scratchpad(therm, &scpd);
 finish:
     return ret;
 }

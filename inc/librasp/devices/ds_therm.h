@@ -32,19 +32,23 @@ extern "C" {
 #define READ_POW_SUPPLY     0xb4
 #define READ_SCRATCHPAD     0xbe
 
-/* supported DS therms (more may be added in the future) */
+/* supported DS therms families */
+#define DS18S20             0x10
 #define DS1822              0x22
 #define DS18B20             0x28
 #define DS1825              0x3b
 #define DS28EA00            0x42
 
+#define dsth_get_family(id) ((id)&0xff)
+
 /* returns NULL if not supported */
 #define dsth_name(id) \
+    (((id)&0xff)==DS18S20 ? "DS18S20" : \
     (((id)&0xff)==DS1822 ? "DS1822" : \
     (((id)&0xff)==DS18B20 ? "DS18B20" : \
     (((id)&0xff)==DS1825 ? "DS1825" : \
     (((id)&0xff)==DS28EA00 ? "DS28EA00" : \
-    (NULL)))))
+    (NULL))))))
 
 typedef struct _dsth_scratchpad_t
 {
@@ -52,43 +56,65 @@ typedef struct _dsth_scratchpad_t
     uint8_t temp_hsb;
     uint8_t th;
     uint8_t tl;
-    uint8_t cfg_reg;
-    uint8_t res1;
-    uint8_t res2;
-    uint8_t res3;
+    uint8_t cfg_reg;    /* DS18S20: reserved */
+    uint8_t reserved;
+    uint8_t cnt_rem;    /* DS18S20 only */
+    uint8_t cnt_per_c;  /* DS18S20 only */
     uint8_t crc;
 } dsth_scratchpad_t;
 
 /* Low level therm functions
+
+   NOTE: All functions containing "pullup" in their names, requires
+   the library to be configured with CONFIG_WRITE_PULLUP.
  */
+
 lr_errc_t dsth_read_pow_supply(
     w1_hndl_t *p_w1_h, w1_slave_id_t therm, bool_t *p_is_paras);
+
 lr_errc_t dsth_convert_t(
     w1_hndl_t *p_w1_h, w1_slave_id_t therm, void *p_status, size_t stat_len);
-/* the lib must be configured to support this function (CONFIG_WRITE_PULLUP) */
+
 lr_errc_t dsth_convert_t_with_pullup(
     w1_hndl_t *p_w1_h, w1_slave_id_t therm, unsigned int pullup);
+
 lr_errc_t dsth_read_scratchpad(
     w1_hndl_t *p_w1_h, w1_slave_id_t therm, dsth_scratchpad_t *p_scpd);
+
+/* 'cfg_reg' is ignored if writing the scratchpad for DS18S20 */
 lr_errc_t dsth_write_scratchpad(w1_hndl_t *p_w1_h,
     w1_slave_id_t therm, uint8_t th, uint8_t tl, uint8_t cfg_reg);
+
 lr_errc_t dsth_copy_scratchpad(w1_hndl_t *p_w1_h, w1_slave_id_t therm);
+
 lr_errc_t dsth_copy_scratchpad_with_pullup(
     w1_hndl_t *p_w1_h, w1_slave_id_t therm, unsigned int pullup);
+
 lr_errc_t dsth_recall_eeprom(
     w1_hndl_t *p_w1_h, w1_slave_id_t therm, uint8_t *p_status);
 
 /* Functions below perform the same actions as their counterparts above but
    for all devices connected to the bus controlled by a master.
  */
+
 lr_errc_t dsth_convert_t_all(w1_hndl_t *p_w1_h, w1_master_id_t master);
+
 lr_errc_t dsth_convert_t_with_pullup_all(
     w1_hndl_t *p_w1_h, w1_master_id_t master, unsigned int pullup);
+
+/* use with care: DS18S20 should not be present on the bus */
 lr_errc_t dsth_write_scratchpad_all(w1_hndl_t *p_w1_h,
     w1_master_id_t master, uint8_t th, uint8_t tl, uint8_t cfg_reg);
+
+/* use with care: bus with DS18S20 only */
+lr_errc_t dsth_write_scratchpad_all_ds18s20(
+    w1_hndl_t *p_w1_h, w1_master_id_t master, uint8_t th, uint8_t tl);
+
 lr_errc_t dsth_copy_scratchpad_all(w1_hndl_t *p_w1_h, w1_master_id_t master);
+
 lr_errc_t dsth_copy_scratchpad_with_pullup_all(
     w1_hndl_t *p_w1_h, w1_master_id_t master, unsigned int pullup);
+
 lr_errc_t dsth_recall_eeprom_all(w1_hndl_t *p_w1_h, w1_master_id_t master);
 
 typedef enum _dsth_res_t {
@@ -110,6 +136,10 @@ typedef enum _dsth_res_t {
 /* Get/set therm resolution for a single therm.
    The resolution is set by fetching the current configuration, modifying it
    and writing back to the device.
+
+   NOTE: For DS18S20 the resolution is always 12-bit and can not be changed,
+   therefore dsth_set_res() returns LREC_DEV_ERR if called with resolution
+   other than 12-bit.
  */
 lr_errc_t dsth_get_res(w1_hndl_t *p_w1_h, w1_slave_id_t therm, dsth_res_t *p_res);
 lr_errc_t dsth_set_res(w1_hndl_t *p_w1_h, w1_slave_id_t therm, dsth_res_t res);
@@ -117,7 +147,8 @@ lr_errc_t dsth_set_res(w1_hndl_t *p_w1_h, w1_slave_id_t therm, dsth_res_t res);
 /* The function fetches temperature value from the scratchpad (previously
    obtained by dsth_read_scratchpad()). The value is scaled by 1000.
  */
-int dsth_get_temp_scratchpad(const dsth_scratchpad_t *p_scpd);
+int dsth_get_temp_scratchpad(
+    w1_slave_id_t therm, const dsth_scratchpad_t *p_scpd);
 
 /* Probe a single therm for the temperature and write it under 'p_temp' (x1000).
  */
