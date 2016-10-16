@@ -19,6 +19,13 @@
 extern "C" {
 #endif
 
+/* 1-wire ROM commands */
+#define READ_ROM            0x33
+#define MATCH_ROM           0x55
+#define SKIP_ROM            0xcc
+#define ALARM_SEARCH        0xec
+#define SEARCH_ROM          0xf0
+
 typedef uint32_t w1_master_id_t;
 typedef uint64_t w1_slave_id_t;
 

@@ -9,12 +9,12 @@ OBJS = \
     spi.o \
     w1.o
 
-.PHONY: all clean examples w1_patch FORCE
+.PHONY: all clean examples w1_patch ctags FORCE
 
 all: librasp.a
 
 clean:
-	rm -f librasp.a $(OBJS) $(OBJS:.o=.d)
+	rm -f librasp.a $(OBJS) $(OBJS:.o=.d) tags
 	$(MAKE) -C./devices clean
 	$(MAKE) -C./examples clean
 
@@ -28,21 +28,25 @@ w1_patch:
 	fi;
 	patch -p1 -u -d ${KERNEL_SRC} <./kernel/w1_netlink.patch
 
+ctags:
+	ctags -R --c-kinds=+px --c++-kinds=+px .
 
 ./devices/devices.a: FORCE
 	$(MAKE) -C./devices
 
-%.o: %.c
-	$(CC) -c $(CFLAGS) $< -o $@
-
 librasp.a: $(OBJS) ./devices/devices.a
 	ar rcs $@ $(OBJS) ./devices/*.o
+
+%.o: %.c
+	$(CC) -c $(CFLAGS) $< -o $@
 
 %.d: %.c
 	$(MAKEDEP)
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),w1_patch)
+ifneq ($(MAKECMDGOALS),ctags)
 -include $(OBJS:.o=.d)
+endif
 endif
 endif

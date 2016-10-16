@@ -19,12 +19,6 @@
 extern "C" {
 #endif
 
-#define READ_ROM            0x33
-#define MATCH_ROM           0x55
-#define SKIP_ROM            0xcc
-#define ALARM_SEARCH        0xec
-#define SEARCH_ROM          0xf0
-
 #define CONVERT_T           0x44
 #define COPY_SCRATCHPAD     0x48
 #define WRITE_SCRATCHPAD    0x4e
@@ -49,6 +43,8 @@ extern "C" {
     (((id)&0xff)==DS1825 ? "DS1825" : \
     (((id)&0xff)==DS28EA00 ? "DS28EA00" : \
     (NULL))))))
+
+#define dsth_is_supported(id) (dsth_name(id)!=NULL)
 
 typedef struct _dsth_scratchpad_t
 {
