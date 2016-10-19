@@ -9,7 +9,7 @@ OBJS = \
     spi.o \
     w1.o
 
-.PHONY: all clean examples w1_patch ctags FORCE
+.PHONY: all clean examples w1_patch tags FORCE
 
 all: librasp.a
 
@@ -28,7 +28,7 @@ w1_patch:
 	fi;
 	patch -p1 -u -d ${KERNEL_SRC} <./kernel/w1_netlink.patch
 
-ctags:
+tags:
 	ctags -R --c-kinds=+px --c++-kinds=+px .
 
 ./devices/devices.a: FORCE
@@ -45,7 +45,7 @@ librasp.a: $(OBJS) ./devices/devices.a
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),w1_patch)
-ifneq ($(MAKECMDGOALS),ctags)
+ifneq ($(MAKECMDGOALS),tags)
 -include $(OBJS:.o=.d)
 endif
 endif
