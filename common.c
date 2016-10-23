@@ -12,12 +12,14 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <sched.h>
 #include <stdio.h>
 #include <string.h>
 #include <syslog.h>
 #include <time.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <sys/resource.h>
 #include "common.h"
 #include "librasp/bcm_platform.h"
 
@@ -200,5 +202,58 @@ volatile void *io_mmap(uint32_t io_base, uint32_t len)
         }
         close(phmem);
     }
+    return ret;
+}
+
+#define RT_SCHED    SCHED_RR
+
+/* exported; see header for details */
+lr_errc_t sched_rt_raise_max(sched_rt_t *p_sched_h)
+{
+    lr_errc_t ret = LREC_SCHED_ERR;
+    struct sched_param param;
+
+    p_sched_h->sched = sched_getscheduler(0);
+
+    errno=0;
+    p_sched_h->prio = getpriority(PRIO_PROCESS, 0);
+
+    if (p_sched_h->sched>=0 && (p_sched_h->prio!=-1 || !errno)) {
+        param.sched_priority = sched_get_priority_max(RT_SCHED);
+        if (sched_setscheduler(0, RT_SCHED, &param)!=-1)
+            ret = LREC_SUCCESS;
+    }
+
+    if (ret!=LREC_SUCCESS) {
+        err_printf("[%s] Can't set real-time scheduler; error: %d; %s\n",
+            __func__, errno, strerror(errno));
+
+        /* mark as unable to restore */
+        p_sched_h->sched = -1;
+    }
+
+    return ret;
+}
+
+/* exported; see header for details */
+lr_errc_t sched_restore(sched_rt_t *p_sched_h)
+{
+    lr_errc_t ret = LREC_SUCCESS;
+    struct sched_param param;
+
+    if (p_sched_h->sched >= 0) {
+        param.sched_priority = p_sched_h->prio;
+        if (sched_setscheduler(0, p_sched_h->sched, &param)!=-1)
+        {
+            err_printf("[%s] Can't restore original scheduler of the process; "
+                "sched_setscheduler() error: %d; %s\n",
+                __func__, errno, strerror(errno));
+
+            ret = LREC_SCHED_ERR;
+        } else
+            /* mark as restored */
+            p_sched_h->sched = -1;
+    }
+
     return ret;
 }

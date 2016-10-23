@@ -61,7 +61,8 @@ typedef enum _lr_errc_t
     LREC_READ_ERR,      /* read() error */
     LREC_WRITE_ERR,     /* write() error */
     LREC_IOCTL_ERR,     /* ioctl() error */
-    LREC_POLL_ERR       /* poll() error */
+    LREC_POLL_ERR,      /* poll() error */
+    LREC_SCHED_ERR      /* scheduler related error */
 } lr_errc_t;
 
 typedef enum _lr_loglev_t
@@ -134,6 +135,30 @@ void bts2hex(const uint8_t *p_in, size_t in_len, char *outstr);
 
 #define MIN(a, b)   ((a)<(b) ? (a) : (b))
 #define MAX(a, b)   ((a)>(b) ? (a) : (b))
+
+typedef struct _sched_rt
+{
+    int sched;      /* original scheduler */
+    int prio;       /* original scheduler's priority */
+} sched_rt_t;
+
+/* Change current process scheduler to the real-time one with the maximum
+   possible priority. 'p_sched_h' is a pointer to a handle which will be
+   filled with data needed to restore the original scheduler.
+
+   This function should be used for timing critical section of code. On
+   exit of such section sched_restore() shall be used to restore the original
+   scheduler and its priority.
+ */
+lr_errc_t sched_rt_raise_max(sched_rt_t *p_sched_h);
+
+/* Restore the original scheduler and its priority changed previously by
+   sched_rt_raise_max().
+
+   NOTE: The function may be safety called with the same handle multiple times
+   or even for a handle returned by failed sched_rt_raise_max().
+ */
+lr_errc_t sched_restore(sched_rt_t *p_sched_h);
 
 #ifdef __cplusplus
 }

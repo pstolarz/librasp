@@ -10,11 +10,8 @@
    See the License for more information.
  */
 
-#include <errno.h>
-#include <sched.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/resource.h>
 #include "common.h"
 #include "librasp/devices/hcsr04.h"
 
@@ -31,24 +28,17 @@ lr_errc_t hcsr_probe(gpio_hndl_t *p_gpio_h, clock_hndl_t *p_clk_h,
     lr_errc_t ret=LREC_SUCCESS;
 
     unsigned int state, resp_cnt;
-    bool_t set_high=FALSE, sched_set=FALSE;
+    bool_t set_high=FALSE;
+
+    sched_rt_t sched_h;
 
     uint32_t start;
 
-    int sched, prio;
-    struct sched_param sparam;
-
     EXECLK_RG(clock_get_ticks32(p_clk_h, &start));
-
-    sched=sched_getscheduler(0);
-    errno=0; prio=getpriority(PRIO_PROCESS, 0);
 
     /* Enter timing critical part
      */
-    if (sched>=0 && (prio!=-1 || !errno)) {
-        sparam.sched_priority = sched_get_priority_max(SCHED_RR);
-        if (sched_setscheduler(0, SCHED_RR, &sparam)!=-1) sched_set=TRUE;
-    }
+    sched_rt_raise_max(&sched_h);
 
     /* trigger the sensor */
 
@@ -93,10 +83,7 @@ break_readloop:
 
     /* Exit timing critical part
      */
-    if (sched_set) {
-        sparam.sched_priority = prio;
-        if (sched_setscheduler(0, sched, &sparam)!=-1) sched_set=FALSE;
-    }
+    sched_restore(&sched_h);
 
     if (!resp_cnt) {
         err_printf("[%s] No sensor response\n", __func__);
@@ -110,15 +97,9 @@ break_readloop:
     *p_dist_cm = resp_cnt;
 
 finish:
-    if (sched_set) {
-        sparam.sched_priority = prio;
-        if (sched_setscheduler(0, sched, &sparam)==-1)
-        {
-            warn_printf("[%s] Can't restore original scheduler of the process; "
-                "sched_setscheduler() error: %d; %s\n",
-                __func__, errno, strerror(errno));
-        }
-    }
+    /* in case of error in the timing critical part */
+    sched_restore(&sched_h);
+
     if (set_high) {
         gpio_set_value(p_gpio_h, trig_gpio, 0);
     }

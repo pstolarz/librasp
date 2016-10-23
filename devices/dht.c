@@ -10,11 +10,8 @@
    See the License for more information.
  */
 
-#include <errno.h>
-#include <sched.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/resource.h>
 #include "common.h"
 #include "librasp/devices/dht.h"
 
@@ -34,25 +31,18 @@ static lr_errc_t __dht_probe(
 
     size_t i, j;
     unsigned int state;
-    bool_t set_low=FALSE, sched_set=FALSE;
+    bool_t set_low=FALSE;
 
-    int sched, prio;
-    struct sched_param sparam;
+    sched_rt_t sched_h;
 
     uint8_t data[DHT_DTA_BITS/8], crc;
     uint32_t start, siglens[DHT_DTA_BITS+1];
 
     memset(data, 0, sizeof(data));
 
-    sched=sched_getscheduler(0);
-    errno=0; prio=getpriority(PRIO_PROCESS, 0);
-
     /* Enter timing critical part
      */
-    if (sched>=0 && (prio!=-1 || !errno)) {
-        sparam.sched_priority = sched_get_priority_max(SCHED_RR);
-        if (sched_setscheduler(0, SCHED_RR, &sparam)!=-1) sched_set=TRUE;
-    }
+    sched_rt_raise_max(&sched_h);
 
     /* initialize DHT sensor communication */
 
@@ -103,10 +93,7 @@ static lr_errc_t __dht_probe(
 
     /* Exit timing critical part
      */
-    if (sched_set) {
-        sparam.sched_priority = prio;
-        if (sched_setscheduler(0, sched, &sparam)!=-1) sched_set=FALSE;
-    }
+    sched_restore(&sched_h);
 
     if (!i) {
         char *log = "[%s] No sensor response\n";
@@ -172,15 +159,9 @@ static lr_errc_t __dht_probe(
     }
 
 finish:
-    if (sched_set) {
-        sparam.sched_priority = prio;
-        if (sched_setscheduler(0, sched, &sparam)==-1)
-        {
-            warn_printf("[%s] Can't restore original scheduler of the process; "
-                "sched_setscheduler() error: %d; %s\n",
-                __func__, errno, strerror(errno));
-        }
-    }
+    /* in case of error in the timing critical part */
+    sched_restore(&sched_h);
+
     if (set_low) {
         gpio_opndrn_set_value(p_gpio_h, gpio, 1);
     }
