@@ -284,7 +284,7 @@ lr_errc_t dsth_get_res(w1_hndl_t *p_w1_h, w1_slave_id_t therm, dsth_res_t *p_res
         EXEC_RG(dsth_read_scratchpad(p_w1_h, therm, &scpd));
         *p_res = (dsth_res_t)((scpd.cfg_reg>>5)&3);
     } else
-        ret = DSTH_RES_12BIT;
+        *p_res = DSTH_RES_12BIT;
 finish:
     return ret;
 }

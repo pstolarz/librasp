@@ -599,7 +599,7 @@ check_next_exec_cmd:
         if (IS_RESP_REQUIRED(p_w1cmd_exec->type) && p_w1cmd->len>0)
         {
             if ((p_w1cmd->len != p_w1cmd_exec->len) ||
-                !(p_w1cmd->data && p_w1cmd_exec->p_data))
+                (p_w1cmd->len && !p_w1cmd_exec->p_data))
             {
                 /* shall never happen */
                 p_cb_dta->status = -ENOMSG;
@@ -608,7 +608,9 @@ check_next_exec_cmd:
                 err_printf("[%s] w1 command data content error\n", __func__);
                 goto finish;
             }
-            memcpy(p_w1cmd_exec->p_data, p_w1cmd->data, p_w1cmd->len);
+
+            if (p_w1cmd->len)
+                memcpy(p_w1cmd_exec->p_data, p_w1cmd->data, p_w1cmd->len);
         }
     }
 
