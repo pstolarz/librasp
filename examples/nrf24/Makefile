@@ -1,7 +1,7 @@
-CC=gcc
-CFLAGS=-Wall -I../../inc
+CC = $(CROSS_COMPILE)gcc
+CFLAGS += -Wall -I../../inc
 
-EXAMPS = \
+EXAMPLES = \
     nrf_rx \
     nrf_tx \
     nrf_tx_car \
@@ -9,10 +9,10 @@ EXAMPS = \
 
 .PHONY: all clean FORCE
 
-all: $(EXAMPS)
+all: $(EXAMPLES)
 
 clean:
-	rm -f $(EXAMPS)
+	$(RM) $(EXAMPLES)
 
 ../../librasp.a: FORCE
 	$(MAKE) -C../.. librasp.a

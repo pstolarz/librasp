@@ -1,7 +1,7 @@
-CC=gcc
-CFLAGS=-Wall -I../inc
+CC = $(CROSS_COMPILE)gcc
+CFLAGS += -Wall -I../inc
 
-EXAMPS = \
+EXAMPLES = \
     blink \
     gpio_poll \
     usleep_stc \
@@ -14,10 +14,10 @@ EXAMPS = \
 
 .PHONY: all clean nrf24 FORCE
 
-all: $(EXAMPS) nrf24
+all: $(EXAMPLES) nrf24
 
 clean:
-	rm -f $(EXAMPS)
+	$(RM) $(EXAMPLES)
 	$(MAKE) -C./nrf24 clean
 
 nrf24:

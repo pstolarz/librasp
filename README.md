@@ -23,6 +23,11 @@ produces static library `librasp.a` which may be linked into an application.
 
 will compile examples in `./examples`.
 
+There is possible to cross-compile the library by setting `CROSS_COMPILE` (for
+the project `Makefile`) to the tool-chain prefix:
+
+    CROSS_COMPILE=<tool-chain-prefix> make
+
 1-wire and parasite powering
 ----------------------------
 

@@ -1,6 +1,8 @@
-CC=gcc
-CFLAGS=-Wall -I../inc -I..
-MAKEDEP=gcc $(CFLAGS) $< -MM -MT "$@ $*.o" -MF $@
+CC = $(CROSS_COMPILE)gcc
+CFLAGS += -Wall -I../inc -I..
+
+AR = $(CROSS_COMPILE)ar
+MAKEDEP = $(CROSS_COMPILE)gcc $(CFLAGS) $< -MM -MT "$@ $*.o" -MF $@
 
 OBJS = \
     dht.o \
@@ -14,13 +16,13 @@ OBJS = \
 all: devices.a
 
 clean:
-	rm -f devices.a $(OBJS) $(OBJS:.o=.d)
+	$(RM) devices.a $(OBJS) $(OBJS:.o=.d)
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 devices.a: $(OBJS)
-	ar rcs $@ $(OBJS)
+	$(AR) rcs $@ $(OBJS)
 
 %.d: %.c
 	$(MAKEDEP)

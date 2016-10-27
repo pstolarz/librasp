@@ -1,6 +1,8 @@
-CC=gcc
-CFLAGS=-Wall -I./inc
-MAKEDEP=gcc $(CFLAGS) $< -MM -MT "$@ $*.o" -MF $@
+CC = $(CROSS_COMPILE)gcc
+CFLAGS += -Wall -I./inc
+
+AR = $(CROSS_COMPILE)ar
+MAKEDEP = $(CROSS_COMPILE)gcc $(CFLAGS) $< -MM -MT "$@ $*.o" -MF $@
 
 OBJS = \
     common.o \
@@ -14,7 +16,7 @@ OBJS = \
 all: librasp.a
 
 clean:
-	rm -f librasp.a $(OBJS) $(OBJS:.o=.d) tags
+	$(RM) librasp.a $(OBJS) $(OBJS:.o=.d) tags
 	$(MAKE) -C./devices clean
 	$(MAKE) -C./examples clean
 
@@ -35,7 +37,7 @@ tags:
 	$(MAKE) -C./devices
 
 librasp.a: $(OBJS) ./devices/devices.a
-	ar rcs $@ $(OBJS) ./devices/*.o
+	$(AR) rcs $@ $(OBJS) ./devices/*.o
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
