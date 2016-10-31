@@ -50,8 +50,8 @@ protocol.
 
     `dtoverlay=w1-gpio,pullup=on`
 
-   NOTE: The configuration is not required when using `w1-gpio-cl` driver
-   instead of `w1-gpio`.
+   NOTE: This step is not required when using `w1-gpio-cl` driver instead of
+   `w1-gpio`.
 
    https://github.com/pstolarz/w1-gpio-cl
 

@@ -13,4 +13,7 @@
 /* 1-wire write with pullup support; requires "wire" kernel module patch. */
 #undef CONFIG_WRITE_PULLUP
 
+/* Fast CRC calculation (using lookup table). */
+#define CONFIG_FAST_CRC
+
 #endif /* __CONFIG_H__ */
