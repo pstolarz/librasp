@@ -106,8 +106,24 @@ lr_errc_t spi_set_speed(
 #define spi_set_cs_change(hndl, cschng) (hndl)->cs_change = (cschng)
 
 /* SPI transmit.
+
+   'len' specifies length of the transmitted data in bytes.
+   Interpretation of data in TX/RX buffers depends on the configured SPI word
+   size and an SPI master driver being used. The following rules should be
+   true in most cases:
+   - For 8-bits word (the most common use case), transmitted data as a table
+     of unsigned bytes (uint8).
+   - For 16-bits word: transmitted data as a table of uint16 integers (platform
+     endianess).
+   - For 32-bits word: transmitted data as a table of uint32 integers (platform
+     endianess).
+   - For other word lengths (< 32bits): transmitted data as a table of
+     uint8/16/32 integers (platform endianess, 1 word per integer), where the
+     actual integer length is closest-round-up of the word size (eg. 12-bits ->
+     uint16) and unused most significant bits for each integer are zeroed.
+     Support of this case is rare.
  */
-lr_errc_t spi_transmit(spi_hndl_t *p_hndl, uint8_t *tx, uint8_t *rx, size_t len);
+lr_errc_t spi_transmit(spi_hndl_t *p_hndl, void *tx, void *rx, size_t len);
 
 #ifdef __cplusplus
 }

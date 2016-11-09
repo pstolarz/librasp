@@ -148,7 +148,7 @@ lr_errc_t spi_set_speed(
 }
 
 /* exported; see header for details */
-lr_errc_t spi_transmit(spi_hndl_t *p_hndl, uint8_t *tx, uint8_t *rx, size_t len)
+lr_errc_t spi_transmit(spi_hndl_t *p_hndl, void *tx, void *rx, size_t len)
 {
     lr_errc_t ret = LREC_SUCCESS;
     struct spi_ioc_transfer tr;
