@@ -15,7 +15,7 @@ clean:
 	$(RM) $(EXAMPLES)
 
 ../../librasp.a: FORCE
-	$(MAKE) -C../.. librasp.a
+	$(MAKE) -C../..
 
 %: %.c ../../librasp.a
 	$(CC) $(CFLAGS) $^ -o $@

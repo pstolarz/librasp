@@ -24,7 +24,7 @@ nrf24:
 	$(MAKE) -C./nrf24
 
 ../librasp.a: FORCE
-	$(MAKE) -C.. librasp.a
+	$(MAKE) -C..
 
 %: %.c ../librasp.a
 	$(CC) $(CFLAGS) $^ -o $@
