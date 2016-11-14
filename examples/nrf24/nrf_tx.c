@@ -24,8 +24,8 @@
 
 #define CHANNEL     20
 
-#define SPI_CS      1
-#define GPIO_CE     27
+#define SPI_CS      0
+#define GPIO_CE     17
 
 #define chip_enable()  gpio_set_value(&gpio_h, GPIO_CE, 1)
 #define chip_disable() gpio_set_value(&gpio_h, GPIO_CE, 0)

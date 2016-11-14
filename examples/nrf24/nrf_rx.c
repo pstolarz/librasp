@@ -172,7 +172,6 @@ restart:
                 if (rx[0]==0xAB) {
                     printf("Received: \"%s\"\n", &rx[1]);
                 }
-                hal_nrf_flush_rx();
                 cnt = 0;
             }
         }
