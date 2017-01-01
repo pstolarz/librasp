@@ -36,7 +36,8 @@ static spi_hndl_t spi_hndl = {-1};
 #define CHK_SPI_ERR() if (errno==ECOMM) goto finish;
 
 static uint8_t hal_nrf_write_reg(uint8_t reg, uint8_t value);
-static uint16_t hal_nrf_read_multibyte_reg(uint8_t reg, uint8_t *pbuf);
+static uint16_t
+    hal_nrf_read_multibyte_reg(uint8_t reg, uint8_t *pbuf, uint8_t len);
 static void hal_nrf_write_multibyte_reg(
     uint8_t reg, const uint8_t *pbuf, uint8_t length);
 
@@ -422,7 +423,7 @@ uint8_t hal_nrf_get_address(uint8_t address, uint8_t *addr)
     case HAL_NRF_PIPE0:
     case HAL_NRF_PIPE1:
     case HAL_NRF_TX:
-        return (uint8_t)hal_nrf_read_multibyte_reg(address, addr);
+        return (uint8_t)hal_nrf_read_multibyte_reg(address, addr, 0);
     default:
         *addr = hal_nrf_read_reg(RX_ADDR_P0 + address);
         return 1;
@@ -645,7 +646,7 @@ uint8_t hal_nrf_read_rx_payload_width(void)
 
 uint16_t hal_nrf_read_rx_payload(uint8_t *rx_pload)
 {
-    return hal_nrf_read_multibyte_reg((uint8_t)HAL_NRF_RX_PLOAD, rx_pload);
+    return hal_nrf_read_multibyte_reg((uint8_t)HAL_NRF_RX_PLOAD, rx_pload, 0);
 }
 
 void hal_nrf_write_tx_payload(const uint8_t *tx_pload, uint8_t length)
@@ -729,6 +730,48 @@ bool hal_nrf_is_continious_wave_enabled(void)
     return ((hal_nrf_read_reg(RF_SETUP) & (uint8_t)BIT(CONT_WAVE)) != 0);
 }
 
+void hal_nrf_save_ctx(hal_nrf_ctx_t *p_ctx)
+{
+    memset(p_ctx, 0, sizeof(*p_ctx));
+
+    p_ctx->config     = hal_nrf_read_reg(CONFIG);     CHK_SPI_ERR();
+    p_ctx->en_aa      = hal_nrf_read_reg(EN_AA);      CHK_SPI_ERR();
+    p_ctx->en_rxaddr  = hal_nrf_read_reg(EN_RXADDR);  CHK_SPI_ERR();
+    p_ctx->setup_aw   = hal_nrf_read_reg(SETUP_AW);   CHK_SPI_ERR();
+    p_ctx->setup_retr = hal_nrf_read_reg(SETUP_RETR); CHK_SPI_ERR();
+    p_ctx->rf_ch      = hal_nrf_read_reg(RF_CH);      CHK_SPI_ERR();
+    p_ctx->rf_setup   = hal_nrf_read_reg(RF_SETUP);   CHK_SPI_ERR();
+
+    hal_nrf_read_multibyte_reg(
+        HAL_NRF_PIPE0, p_ctx->rx_addr_p0, sizeof(p_ctx->rx_addr_p0));
+    CHK_SPI_ERR();
+
+    hal_nrf_read_multibyte_reg(
+        HAL_NRF_PIPE1, p_ctx->rx_addr_p1, sizeof(p_ctx->rx_addr_p1));
+    CHK_SPI_ERR();
+
+    p_ctx->rx_addr_p2 = hal_nrf_read_reg(RX_ADDR_P2); CHK_SPI_ERR();
+    p_ctx->rx_addr_p3 = hal_nrf_read_reg(RX_ADDR_P3); CHK_SPI_ERR();
+    p_ctx->rx_addr_p4 = hal_nrf_read_reg(RX_ADDR_P4); CHK_SPI_ERR();
+    p_ctx->rx_addr_p5 = hal_nrf_read_reg(RX_ADDR_P5); CHK_SPI_ERR();
+
+    hal_nrf_read_multibyte_reg(
+        HAL_NRF_TX, p_ctx->tx_addr, sizeof(p_ctx->tx_addr));
+    CHK_SPI_ERR();
+
+    p_ctx->rx_pw_p0   = hal_nrf_read_reg(RX_PW_P0);   CHK_SPI_ERR();
+    p_ctx->rx_pw_p1   = hal_nrf_read_reg(RX_PW_P1);   CHK_SPI_ERR();
+    p_ctx->rx_pw_p2   = hal_nrf_read_reg(RX_PW_P2);   CHK_SPI_ERR();
+    p_ctx->rx_pw_p3   = hal_nrf_read_reg(RX_PW_P3);   CHK_SPI_ERR();
+    p_ctx->rx_pw_p4   = hal_nrf_read_reg(RX_PW_P4);   CHK_SPI_ERR();
+    p_ctx->rx_pw_p5   = hal_nrf_read_reg(RX_PW_P5);   CHK_SPI_ERR();
+    p_ctx->dynpd      = hal_nrf_read_reg(DYNPD);      CHK_SPI_ERR();
+    p_ctx->feature    = hal_nrf_read_reg(FEATURE);    CHK_SPI_ERR();
+
+finish:
+    return;
+}
+
 uint8_t hal_nrf_read_reg(uint8_t reg)
 {
     uint8_t tx[2], rx[2];
@@ -768,12 +811,14 @@ static uint8_t hal_nrf_write_reg(uint8_t reg, uint8_t value)
  *
  * @param reg Multibyte register to read from.
  * @param *pbuf Pointer to buffer in which to store read bytes to.
+ * @param len Expected response length. If 0: length selected automatically.
  * @return pipe # of received data (MSB), if operation used by
  * hal_nrf_read_rx_payload().
  * @return length of read data (LSB), either for hal_nrf_read_rx_payload() or
  * for hal_nrf_get_address().
  */
-static uint16_t hal_nrf_read_multibyte_reg(uint8_t reg, uint8_t *pbuf)
+static uint16_t
+    hal_nrf_read_multibyte_reg(uint8_t reg, uint8_t *pbuf, uint8_t len)
 {
     uint8_t length;
     uint8_t tx[NRF_MAX_PL+1], rx[NRF_MAX_PL+1];
@@ -783,8 +828,12 @@ static uint16_t hal_nrf_read_multibyte_reg(uint8_t reg, uint8_t *pbuf)
     case HAL_NRF_PIPE0:
     case HAL_NRF_PIPE1:
     case HAL_NRF_TX:
-        length = hal_nrf_get_address_width();
-        CHK_SPI_ERR();
+        if (!len) {
+            length = hal_nrf_get_address_width();
+            CHK_SPI_ERR();
+        } else
+            length = len;
+
         tx[0] = RX_ADDR_P0+reg;
         break;
 
@@ -793,11 +842,15 @@ static uint16_t hal_nrf_read_multibyte_reg(uint8_t reg, uint8_t *pbuf)
         CHK_SPI_ERR();
 
         if (reg < 7) {
-            length = hal_nrf_read_rx_payload_width();
-            CHK_SPI_ERR();
+            if (!len) {
+                length = hal_nrf_read_rx_payload_width();
+                CHK_SPI_ERR();
+            } else
+                length = len;
+
             tx[0] = R_RX_PAYLOAD;
-        }
-        else length = 0;
+        } else
+            length = 0;
         break;
 
     default:

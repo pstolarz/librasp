@@ -76,8 +76,8 @@ extern "C" {
  */
 
 /* nRF24L01 Instruction Definitions */
-#define R_REGISTER         0x00U  /* Register read */
-#define W_REGISTER         0x20U  /* Register write */
+#define R_REGISTER         0x00U  /* Register read (added to register id) */
+#define W_REGISTER         0x20U  /* Register write (added to register id) */
 #define R_RX_PAYLOAD       0x61U  /* Read RX payload */
 #define W_TX_PAYLOAD       0xA0U  /* Write TX payload */
 #define FLUSH_TX           0xE1U  /* Flush TX register */
@@ -267,8 +267,38 @@ typedef enum {
     HAL_NRF_AW_5BYTES           /* Set address width to 5 bytes */
 } hal_nrf_address_width_t;
 
+/**
+ * Transceiver context.
+ */
+typedef struct {
+    uint8_t config;
+    uint8_t en_aa;
+    uint8_t en_rxaddr;
+    uint8_t setup_aw;
+    uint8_t setup_retr;
+    uint8_t rf_ch;
+    uint8_t rf_setup;
+    /* STATUS, OBSERVE_TX, CD omitted */
+    uint8_t rx_addr_p0[5];
+    uint8_t rx_addr_p1[5];
+    uint8_t rx_addr_p2;
+    uint8_t rx_addr_p3;
+    uint8_t rx_addr_p4;
+    uint8_t rx_addr_p5;
+    uint8_t tx_addr[5];
+    uint8_t rx_pw_p0;
+    uint8_t rx_pw_p1;
+    uint8_t rx_pw_p2;
+    uint8_t rx_pw_p3;
+    uint8_t rx_pw_p4;
+    uint8_t rx_pw_p5;
+    /* FIFO_STATUS omitted */
+    uint8_t dynpd;
+    uint8_t feature;
+} hal_nrf_ctx_t;
+
 /*
- * Setup function prototypes
+ * Setup functions prototypes
  */
 
 /**
@@ -760,7 +790,7 @@ bool hal_nrf_get_carrier_detect(void);
 #define hal_nrf_get_rcv_pwr_detector() hal_nrf_get_carrier_detect()
 
 /*
- * Data operation prototypes
+ * Data operation functions prototypes
  */
 
 /**
@@ -893,6 +923,13 @@ bool hal_nrf_is_continious_wave_enabled(void);
 /*
  * Auxiliary functions prototypes
  */
+
+/**
+ * Save transceiver context.
+ *
+ * @param *p_ctx Pointer to a struct where the context will be written.
+ */
+void hal_nrf_save_ctx(hal_nrf_ctx_t *p_ctx);
 
 /**
  * Read transmitter register content.
