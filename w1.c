@@ -249,7 +249,7 @@ static lr_errc_t recv_w1msg(w1_hndl_t *p_hndl,
 
             if (get_librasp_log_level()<=LRLOG_DEBUG)
             {
-                char fltr_msg[32] = "";
+                char fltr_msg[48] = "";
 
                 if (fltr) sprintf(fltr_msg, "; filtered out: %s",
                     (fltr==1 ? "no w1 msg" : "req/resp seqs not match"));
@@ -295,7 +295,7 @@ static lr_errc_t recv_w1msg(w1_hndl_t *p_hndl,
 
             if (get_librasp_log_level()<=LRLOG_DEBUG)
             {
-                char fltr_msg[32] = "";
+                char fltr_msg[48] = "";
                 char data_msg[2*DBG_PRINTF_DATA_MAX+32] = "";
 
                 PREP_DATA_MSG_BUF(data_msg, p_w1msg);
