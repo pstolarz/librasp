@@ -20,7 +20,7 @@ index 881597a..26918d3 100644
  		break;
  	case W1_CMD_READ:
  	case W1_CMD_WRITE:
-+    case W1_CMD_WRITE_PULLUP:
++	case W1_CMD_WRITE_PULLUP:
  	case W1_CMD_TOUCH:
  		err = w1_process_command_io(dev, req_cmd);
  		break;
