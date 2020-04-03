@@ -9,7 +9,7 @@
  * the file.
  */
 /*
-   Copyright (c) 2015,2016 Piotr Stolarz
+   Copyright (c) 2015,2016,2020 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -512,10 +512,13 @@ bool hal_nrf_get_irq_mode(hal_nrf_irq_source_t int_source)
     {
     case HAL_NRF_MAX_RT:
         retval = !(config & (uint8_t)BIT(MASK_MAX_RT));
+        break;
     case HAL_NRF_TX_DS:
         retval = !(config & (uint8_t)BIT(MASK_TX_DS));
+        break;
     case HAL_NRF_RX_DR:
         retval = !(config & (uint8_t)BIT(MASK_RX_DR));
+        break;
     }
     return retval;
 }
