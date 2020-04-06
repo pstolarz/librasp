@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015,2016 Piotr Stolarz
+   Copyright (c) 2015,2016,2020 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -22,6 +22,10 @@
 
 #include "librasp/gpio.h"
 #include "librasp/devices/nrf_hal.h"
+
+/* first and last channel to scan */
+#define CHANNEL_START   0
+#define CHANNEL_STOP    127
 
 #define SPI_CS      0
 #define GPIO_CE     17
@@ -73,7 +77,10 @@ int main(void)
 
     NRF_EXEC(hal_nrf_set_operation_mode(HAL_NRF_PRX));
 
-    for (ch=0; ch<128 && !scan_finish; ch++)
+    printf("Scanning starts at %d, ends at %d channel...\n",
+        CHANNEL_START, CHANNEL_STOP);
+
+    for (ch=CHANNEL_START; ch<=CHANNEL_STOP && !scan_finish; ch++)
     {
         int i;
 

@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015,2016 Piotr Stolarz
+   Copyright (c) 2015,2016,2020 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -85,7 +85,7 @@ int main(void)
         (hal_nrf_get_output_power()==HAL_NRF_0DBM) &&
         (hal_nrf_get_rf_channel()==CHANNEL));
 
-    printf("RF carrier transmitted on channel %d...\n", CHANNEL);
+    printf("Transmitting RF carrier on channel %d...\n", CHANNEL);
 
     chip_enable();
     while (!trans_finish) usleep(100000);

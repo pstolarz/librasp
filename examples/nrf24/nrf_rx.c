@@ -163,10 +163,10 @@ restart:
 #endif
         /* check irq type */
         irq_flg = hal_nrf_get_clear_irq_flags();
-        if(irq_flg & (1U<<HAL_NRF_RX_DR))
+        if (irq_flg & (1U<<HAL_NRF_RX_DR))
         {
             /* read RX FIFO of received messages */
-            while(!hal_nrf_rx_fifo_empty())
+            while (!hal_nrf_rx_fifo_empty())
             {
                 hal_nrf_read_rx_payload(rx);
                 if (rx[0]==0xAB) {
