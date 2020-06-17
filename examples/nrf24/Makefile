@@ -1,5 +1,8 @@
+.PHONY: all clean librasp
+
+LIBRASP_DIR=../../src
 CC = $(CROSS_COMPILE)gcc
-CFLAGS += -Wall -I../../inc
+CFLAGS += -Wall -I$(LIBRASP_DIR)/inc
 
 EXAMPLES = \
     nrf_rx \
@@ -7,15 +10,13 @@ EXAMPLES = \
     nrf_tx_car \
     nrf_scan
 
-.PHONY: all clean FORCE
-
-all: $(EXAMPLES)
+all: librasp $(EXAMPLES)
 
 clean:
 	$(RM) $(EXAMPLES)
 
-../../librasp.a: FORCE
-	$(MAKE) -C../..
+librasp:
+	$(MAKE) -C$(LIBRASP_DIR)
 
-%: %.c ../../librasp.a
-	$(CC) $(CFLAGS) $^ -o $@
+%: %.c
+	$(CC) $(CFLAGS) $< -o $@ -L$(LIBRASP_DIR) -lrasp

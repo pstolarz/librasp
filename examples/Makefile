@@ -1,5 +1,8 @@
+.PHONY: all clean librasp nrf24_examples
+
+LIBRASP_DIR=../src
 CC = $(CROSS_COMPILE)gcc
-CFLAGS += -Wall -I../inc
+CFLAGS += -Wall -I$(LIBRASP_DIR)/inc
 
 EXAMPLES = \
     blink \
@@ -12,19 +15,17 @@ EXAMPLES = \
     dht_probe \
     hcsr_probe
 
-.PHONY: all clean nrf24 FORCE
-
-all: $(EXAMPLES) nrf24
+all: librasp $(EXAMPLES) nrf24_examples
 
 clean:
 	$(RM) $(EXAMPLES)
 	$(MAKE) -C./nrf24 clean
 
-nrf24:
+nrf24_examples:
 	$(MAKE) -C./nrf24
 
-../librasp.a: FORCE
-	$(MAKE) -C..
+librasp:
+	$(MAKE) -C$(LIBRASP_DIR)
 
-%: %.c ../librasp.a
-	$(CC) $(CFLAGS) $^ -o $@
+%: %.c
+	$(CC) $(CFLAGS) $< -o $@ -L$(LIBRASP_DIR) -lrasp

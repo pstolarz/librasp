@@ -7,8 +7,8 @@ popular devices like wireless nRF24L01 transceiver, DHT temperature sensors
 (DHT11/22), Dallas family of temperature sensors (e.g. DS18B20, DS1822, DS1825),
 HC-SR04 distance sensor, PISO shift register...
 
-API specification contained in the library headers (see `./inc/librasp`).  For
-examples look in `./examples`.
+API specification contained in the library headers (see [`src/inc/librasp`](src/inc/librasp)).
+For examples look in [`examples`](examples).
 
 Expect more sensors support in the future.
 
@@ -17,11 +17,11 @@ Compilation
 
     make
 
-produces static library `librasp.a` which may be linked into an application.
+produces static library `src/librasp.a` which may be linked into an application.
 
     make examples
 
-will compile examples in `./examples`.
+will compile examples.
 
 There is possible to cross-compile the library by setting `CROSS_COMPILE` (for
 the project `Makefile`) to the tool-chain prefix:
@@ -36,11 +36,11 @@ proper interface for parasite powering of 1-wire slaves via userland's netlink
 protocol.
 
 1. To handle this issue there has been provided a patch for the kernel allowing
-   the library to fully support the parasite mode. Look in `./kernel` directory
-   for more info.
+   the library to fully support the parasite mode. Look in [`src/kernel`](src/kernel)
+   directory for more info.
 
 2. Configure the library with `CONFIG_WRITE_PULLUP` parameter by updating
-   `./config.h` while building the library.
+   [`src/config.h`](src/config.h) while building the library.
 
 3. RPi uses `w1-gpio` module as a 1-wire bus master driver. The driver needs
    to be configured to support bit-banged strong pull-up on the data wire,
@@ -50,10 +50,8 @@ protocol.
 
     `dtoverlay=w1-gpio,pullup=on`
 
-   NOTE: This step is not required when using `w1-gpio-cl` driver instead of
-   `w1-gpio`.
-
-   https://github.com/pstolarz/w1-gpio-cl
+   NOTE: This step is not required when using [`w1-gpio-cl`](https://github.com/pstolarz/w1-gpio-cl)
+   driver instead of `w1-gpio`.
 
    To reach for the full power of the library, it is **strongly recommended**
    to use the `w1-gpio-cl` driver instead of the standard one. The primary
@@ -61,7 +59,7 @@ protocol.
    more mature parasite powering handling. See the above link for more
    details.
 
-Refer `./examples/dsth_list*` samples for details on probing the parasite
+Refer `examples/dsth_list*` samples for details on probing the parasite
 powered Dallas family of temperature sensors.
 
 License

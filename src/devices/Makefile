@@ -1,3 +1,5 @@
+.PHONY: all clean
+
 CC = $(CROSS_COMPILE)gcc
 CFLAGS += -Wall -I../inc -I..
 
@@ -11,18 +13,16 @@ OBJS = \
     shr_piso.o \
     nrf_hal.o
 
-.PHONY: all clean
-
 all: devices.a
 
 clean:
 	$(RM) devices.a $(OBJS) $(OBJS:.o=.d)
 
-%.o: %.c
-	$(CC) -c $(CFLAGS) $< -o $@
-
 devices.a: $(OBJS)
 	$(AR) rcs $@ $(OBJS)
+
+%.o: %.c
+	$(CC) -c $(CFLAGS) $< -o $@
 
 %.d: %.c
 	$(MAKEDEP)
