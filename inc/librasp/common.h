@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015,2016 Piotr Stolarz
+   Copyright (c) 2015,2016,2020 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -91,7 +91,9 @@ lr_loglev_t get_librasp_log_level(void);
 typedef enum _platform_t
 {
     bcm_2708=0,
-    bcm_2709
+    bcm_2709,
+    bcm_2710,
+    bcm_2711
 } platform_t;
 
 /* Platform type detection. Returns -1 in case the platform can't be recognized

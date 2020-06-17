@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015,2016 Piotr Stolarz
+   Copyright (c) 2015,2016,2020 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <sched.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
 #include <time.h>
@@ -47,15 +48,44 @@ platform_t platform_detect()
     platform_t plat=(platform_t)-1;
     FILE *f = fopen("/proc/cpuinfo", "r");
 
-    if (f) {
+    if (f)
+    {
         char line[64];
-        while (fgets(line, sizeof(line), f)) {
-            if ((line[0]=='H' || line[0]=='h') &&
-                !strncmp("ardware", &line[1], 7))
+        while (fgets(line, sizeof(line), f))
+        {
+            if ((line[0]=='R' || line[0]=='r') &&
+                !strncmp("evision", &line[1], 7))
             {
-                if (strstr(line, "BCM2708")) plat=bcm_2708;
-                else
-                if (strstr(line, "BCM2709")) plat=bcm_2709;
+                uint32_t rev;
+                char *endptr, *rev_str;
+
+                if (!(rev_str = strchr(line, ':'))) break;
+                rev = strtol(++rev_str, &endptr, 16);
+                /* string to int conversion failed*/
+                if (endptr == rev_str) break;
+
+                if (rev <= 0x15) {
+                    /* old-style revision codes */
+                    plat = bcm_2708;
+                } else {
+                    /* new style format: NOQuuuWuFMMMCCCCPPPPTTTTTTTTRRRR,
+                       where PPPP denotes processor */
+                    switch ((rev >> 12) & 0x0f)
+                    {
+                    case 0:
+                        plat = bcm_2708;
+                        break;
+                    case 1:
+                        plat = bcm_2709;
+                        break;
+                    case 2:
+                        plat = bcm_2710;
+                        break;
+                    case 3:
+                        plat = bcm_2711;
+                        break;
+                    }
+                }
                 break;
             }
         }
@@ -76,6 +106,12 @@ uint32_t get_bcm_io_base()
         break;
     case bcm_2709:
         ret=BCM2709_PERI_BASE;
+        break;
+    case bcm_2710:
+        ret=BCM2710_PERI_BASE;
+        break;
+    case bcm_2711:
+        ret=BCM2711_PERI_BASE;
         break;
     }
     return ret;

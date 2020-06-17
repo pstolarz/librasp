@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015,2016 Piotr Stolarz
+   Copyright (c) 2015,2016,2020 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -23,6 +23,8 @@
 /* I/O base real addresses */
 #define BCM2708_PERI_BASE   0x20000000
 #define BCM2709_PERI_BASE   0x3f000000
+#define BCM2710_PERI_BASE   BCM2709_PERI_BASE
+#define BCM2711_PERI_BASE   0xfe000000
 
 /* Real relative base addresses of the I/O peripherals
  */
