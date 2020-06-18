@@ -47,9 +47,11 @@ lr_errc_t clock_set_driver(clock_hndl_t *p_hndl, clock_driver_t drv)
         {
             uint32_t io_base = get_bcm_io_base();
             if (io_base) {
-                if (!(p_hndl->io.p_stc_io=
-                        io_mmap(io_base+ST_BASE_RA, BCM_STC_MAP_LEN)))
+                if (!(p_hndl->io.p_stc_io = io_mmap(
+                    DEV_MEM_IO, io_base+ST_BASE_RA, BCM_STC_MAP_LEN)))
+                {
                     ret=LREC_MMAP_ERR;
+                }
             } else {
                 err_printf("[%s] BCM platform not detected\n", __func__);
                 ret=LREC_PLAT_ERR;

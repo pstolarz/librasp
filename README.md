@@ -65,4 +65,4 @@ powered Dallas family of temperature sensors.
 License
 -------
 
-2 clause BSD license. See LICENSE file for details.
+2 clause BSD license. See [LICENSE](LICENSE) file for details.

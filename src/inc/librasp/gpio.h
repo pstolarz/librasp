@@ -22,7 +22,8 @@ extern "C" {
 
 typedef enum _gpio_driver_t
 {
-    gpio_drv_io=0,
+    gpio_drv_io=0,  /* /dev/mem mapped */
+    gpio_drv_gpio,  /* /dev/gpiomem mapped */
     gpio_drv_sysfs
 } gpio_driver_t;
 

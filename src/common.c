@@ -24,8 +24,6 @@
 #include "common.h"
 #include "librasp/bcm_platform.h"
 
-#define DEV_MEM     "/dev/mem"
-
 /* logging destination */
 static lr_logdst_t log_dest = LRLOGTO_STDOUT;
 
@@ -220,14 +218,14 @@ MSG_PRINT_METHOD(warn_printf, LRLOG_WARN)
 MSG_PRINT_METHOD(err_printf, LRLOG_ERR)
 
 /* exported; see header for details */
-volatile void *io_mmap(uint32_t io_base, uint32_t len)
+volatile void *io_mmap(const char *dev, uint32_t io_base, uint32_t len)
 {
     volatile void *ret = NULL;
     int phmem = -1;
 
-    if ((phmem = open(DEV_MEM, O_RDWR|O_SYNC))<0) {
-        err_printf("[%s] Open " DEV_MEM " error: %d; %s\n",
-            __func__, errno, strerror(errno)) ;
+    if ((phmem = open(dev, O_RDWR|O_SYNC))<0) {
+        err_printf("[%s] Open %s error: %d; %s\n",
+            __func__, dev, errno, strerror(errno)) ;
     } else
     {
         ret = mmap(NULL, len, PROT_READ|PROT_WRITE, MAP_SHARED, phmem, io_base);

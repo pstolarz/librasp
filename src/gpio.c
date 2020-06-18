@@ -49,14 +49,18 @@ lr_errc_t gpio_set_driver(gpio_hndl_t *p_hndl, gpio_driver_t drv)
         /* fall-through */
 
     case gpio_drv_io:
+    case gpio_drv_gpio:
       {
         if (!p_hndl->io.p_gpio_io)
         {
             uint32_t io_base = get_bcm_io_base();
             if (io_base) {
-                if (!(p_hndl->io.p_gpio_io =
-                        io_mmap(io_base+GPIO_BASE_RA, BCM_GPIO_MAP_LEN)))
+                if (!(p_hndl->io.p_gpio_io = io_mmap(
+                    (drv == gpio_drv_io ? DEV_MEM_IO : DEV_MEM_GPIO),
+                    io_base+GPIO_BASE_RA, BCM_GPIO_MAP_LEN)))
+                {
                     ret=LREC_MMAP_ERR;
+                }
             } else {
                 err_printf("[%s] BCM platform not detected\n", __func__);
                 ret=LREC_PLAT_ERR;
@@ -200,7 +204,7 @@ lr_errc_t gpio_direction_input(gpio_hndl_t *p_hndl, unsigned int gpio)
 {
     lr_errc_t ret;
 
-    if (p_hndl->drv==gpio_drv_io) {
+    if (p_hndl->drv==gpio_drv_io || p_hndl->drv==gpio_drv_gpio) {
         ret = gpio_bcm_set_func(p_hndl, gpio, gpio_bcm_in);
     } else {
         ret = sysfs_set_direction(p_hndl, gpio, FALSE);
@@ -214,7 +218,7 @@ lr_errc_t gpio_direction_output(
 {
     lr_errc_t ret;
 
-    if (p_hndl->drv==gpio_drv_io) {
+    if (p_hndl->drv==gpio_drv_io || p_hndl->drv==gpio_drv_gpio) {
         /* set value at first to avoid output blink */
         if ((ret=gpio_set_value(p_hndl, gpio, val))==LREC_SUCCESS)
             ret = gpio_bcm_set_func(p_hndl, gpio, gpio_bcm_out);
@@ -235,7 +239,7 @@ lr_errc_t gpio_get_value(
 
     CHK_GPIO_NUM(gpio);
 
-    if (p_hndl->drv==gpio_drv_io) {
+    if (p_hndl->drv==gpio_drv_io || p_hndl->drv==gpio_drv_gpio) {
         volatile uint32_t *p_gplev = IO_REG32_PTR(
             p_hndl->io.p_gpio_io, GPLEV0+sizeof(uint32_t)*(gpio>>5));
         *p_val = (unsigned int)((*p_gplev>>(gpio&0x1f))&1);
@@ -268,7 +272,7 @@ lr_errc_t
 
     CHK_GPIO_NUM(gpio);
 
-    if (p_hndl->drv==gpio_drv_io) {
+    if (p_hndl->drv==gpio_drv_io || p_hndl->drv==gpio_drv_gpio) {
         volatile uint32_t *p_gpsetclr = IO_REG32_PTR(p_hndl->io.p_gpio_io,
             (val ? GPSET0 : GPCLR0)+sizeof(uint32_t)*(gpio>>5));
         *p_gpsetclr = (uint32_t)1<<(gpio&0x1f);
@@ -349,7 +353,7 @@ lr_errc_t gpio_set_event(
 
     CHK_GPIO_NUM(gpio);
 
-    if (p_hndl->drv==gpio_drv_io) {
+    if (p_hndl->drv==gpio_drv_io || p_hndl->drv==gpio_drv_gpio) {
 #ifdef CONFIG_BCM_GPIO_EVENTS
         volatile uint32_t *p_reg;
         uint32_t gpio_bit = (uint32_t)1<<(gpio&0x1f);

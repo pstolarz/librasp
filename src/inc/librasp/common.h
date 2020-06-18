@@ -32,6 +32,9 @@ extern "C" {
 #define NULL    0
 #endif
 
+#define DEV_MEM_IO      "/dev/mem"
+#define DEV_MEM_GPIO    "/dev/gpiomem"
+
 typedef int bool_t;
 
 /* library error codes */
@@ -116,8 +119,8 @@ platform_t platform_detect();
  */
 uint32_t get_bcm_io_base();
 
-/* Map I/O into the virtual space; return NULL in case of error */
-volatile void *io_mmap(uint32_t io_base, uint32_t len);
+/* Map memory I/O into the virtual space; return NULL in case of error */
+volatile void *io_mmap(const char *dev, uint32_t io_base, uint32_t len);
 
 /* Bytes 'in' to hex conversion (written into 'out') */
 void bts2hex(const uint8_t *p_in, size_t in_len, char *outstr);

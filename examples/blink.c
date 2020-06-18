@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 
     state=0; led=0; div=1; prev_input=1;
 
-    if (gpio_init(&gpio_h, gpio_drv_io)!=LREC_SUCCESS) goto finish;
+    if (gpio_init(&gpio_h, gpio_drv_gpio)!=LREC_SUCCESS) goto finish;
 
     gpio_direction_output(&gpio_h, GPIO_OUT, 0);
 
