@@ -3,15 +3,15 @@
 
 /* Add support for system clock driver. Usage of this driver is problematic
    due to its inaccuracy. */
-#undef CONFIG_CLOCK_SYS_DRIVER
+//#define CONFIG_CLOCK_SYS_DRIVER
 
 /* BCM's GPIO events support. Usage of these events is intended via kernel
    executives (interrupt specific functionality). BCM's events usage in the
    userland is problematic and may lead to unexpected results. */
-#undef CONFIG_BCM_GPIO_EVENTS
+//#define CONFIG_BCM_GPIO_EVENTS
 
 /* 1-wire write with pullup support; requires "wire" kernel module patch. */
-#undef CONFIG_WRITE_PULLUP
+//#define CONFIG_WRITE_PULLUP
 
 /* Fast CRC calculation (using lookup table). */
 #define CONFIG_FAST_CRC
