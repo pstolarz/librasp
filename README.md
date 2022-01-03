@@ -10,7 +10,11 @@ HC-SR04 distance sensor, PISO shift register...
 API specification contained in the library headers (see [`src/inc/librasp`](src/inc/librasp)).
 For examples look in [`examples`](examples).
 
-Expect more sensors support in the future.
+NOTE: 1-wire and SPI API bases on generic Linux interfaces (`ioctl(2)`, `netlink(3)`)
+and doesn't relay on any RPi platform specific details. For this reason the
+1-wire and SPI services may be used on any embedded Linux platform (e.g.
+[`dsth_list`](examples/dsth_list.c) and [`dsth_list2`](examples/dsth_list2.c)
+examples may be used to read-out connected Dallas sensors).
 
 Compilation
 -----------
