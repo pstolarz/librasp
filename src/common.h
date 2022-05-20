@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015,2016 Piotr Stolarz
+   Copyright (c) 2015,2016,2022 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -28,7 +28,7 @@ void err_printf(const char *format, ...);
 
 /* for performance reason don't waste time for checking
    return code if it's guaranteed to be success */
-#ifdef CONFIG_CLOCK_SYS_DRIVER
+#if CONFIG_CLOCK_SYS_DRIVER
 # define EXECLK_RG(c) EXEC_RG(c)
 # define EXECLK_G(c)  EXEC_G(c)
 #else

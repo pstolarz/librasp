@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015,2016,2020 Piotr Stolarz
+   Copyright (c) 2015,2016,2020,2022 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -354,7 +354,7 @@ lr_errc_t gpio_set_event(
     CHK_GPIO_NUM(gpio);
 
     if (p_hndl->drv==gpio_drv_io || p_hndl->drv==gpio_drv_gpio) {
-#ifdef CONFIG_BCM_GPIO_EVENTS
+#if CONFIG_BCM_GPIO_EVENTS
         volatile uint32_t *p_reg;
         uint32_t gpio_bit = (uint32_t)1<<(gpio&0x1f);
 
@@ -389,7 +389,7 @@ lr_errc_t gpio_bcm_get_event_stat(
 
     if (p_hndl->io.p_gpio_io)
     {
-#ifdef CONFIG_BCM_GPIO_EVENTS
+#if CONFIG_BCM_GPIO_EVENTS
         volatile uint32_t *p_gpeds = IO_REG32_PTR(
             p_hndl->io.p_gpio_io, GPEDS0+sizeof(uint32_t)*(gpio>>5));
         *p_stat = (unsigned int)((*p_gpeds>>(gpio&0x1f))&1);

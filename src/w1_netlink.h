@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015,2016 Piotr Stolarz
+   Copyright (c) 2015,2016,2022 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -37,7 +37,7 @@ enum w1_commands {
     W1_CMD_ALARM_SEARCH,
     W1_CMD_TOUCH,
     W1_CMD_RESET
-#ifdef CONFIG_WRITE_PULLUP
+#if CONFIG_WRITE_PULLUP
     ,W1_CMD_WRITE_PULLUP=20
 #endif
 };

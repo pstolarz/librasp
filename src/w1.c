@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015-2017 Piotr Stolarz
+   Copyright (c) 2015-2017,2022 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -63,7 +63,7 @@ static uint8_t convert_cmd_type(w1_cmd_type tpy)
         ret=W1_CMD_RESET;
         break;
     case w1_cmd_write_pullup:
-#ifdef CONFIG_WRITE_PULLUP
+#if CONFIG_WRITE_PULLUP
         ret=W1_CMD_WRITE_PULLUP;
 #endif
         break;
@@ -824,7 +824,7 @@ lr_errc_t add_bus_reset_w1_cmd(w1_msg_t *p_w1msg)
 lr_errc_t add_write_pullup_w1_cmd(
     w1_msg_t *p_w1msg, uint8_t *p_data, size_t len, unsigned int pullup)
 {
-#ifdef CONFIG_WRITE_PULLUP
+#if CONFIG_WRITE_PULLUP
     w1_cmd_extra_dta_t extra;
 
     extra.pullup = pullup;
@@ -855,7 +855,7 @@ lr_errc_t w1_msg_exec(w1_hndl_t *p_hndl, w1_msg_t *p_w1msg)
 
     for (cmds_len=0, i=0; i<p_w1msg->n_cmds; i++) {
         cmds_len += sizeof(struct w1_netlink_cmd)+p_w1msg->cmds[i].len;
-#ifdef CONFIG_WRITE_PULLUP
+#if CONFIG_WRITE_PULLUP
         if (p_w1msg->cmds[i].type==w1_cmd_write_pullup)
             cmds_len += sizeof(uint16_t);
 #endif
@@ -885,7 +885,7 @@ lr_errc_t w1_msg_exec(w1_hndl_t *p_hndl, w1_msg_t *p_w1msg)
         p_w1cmd_nl->cmd = convert_cmd_type(p_w1msg->cmds[i].type);
         p_w1cmd_nl->len = p_w1msg->cmds[i].len;
 
-#ifdef CONFIG_WRITE_PULLUP
+#if CONFIG_WRITE_PULLUP
         if (p_w1msg->cmds[i].type==w1_cmd_write_pullup)
         {
             *(uint16_t*)p_w1cmd_nl->data =

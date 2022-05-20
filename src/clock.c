@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015,2016,2020 Piotr Stolarz
+   Copyright (c) 2015,2016,2020,2022 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -63,7 +63,7 @@ lr_errc_t clock_set_driver(clock_hndl_t *p_hndl, clock_driver_t drv)
       }
 
     case clock_drv_sys:
-#ifdef CONFIG_CLOCK_SYS_DRIVER
+#if CONFIG_CLOCK_SYS_DRIVER
         /* no initialization needed in this case */
 #else
         ret=LREC_NOT_SUPP;
@@ -104,7 +104,7 @@ lr_errc_t clock_get_ticks32(clock_hndl_t *p_hndl, uint32_t *p_ticks)
     if (p_hndl->drv==clock_drv_io) {
         *p_ticks = get_bcm_clock_ticks_lo(p_hndl);
     } else {
-#ifdef CONFIG_CLOCK_SYS_DRIVER
+#if CONFIG_CLOCK_SYS_DRIVER
         struct timespec tp;
         if (!clock_gettime(CLOCK_MONOTONIC, &tp)) {
             *p_ticks = tp.tv_nsec;
@@ -137,7 +137,7 @@ lr_errc_t clock_get_ticks64(clock_hndl_t *p_hndl, uint64_t *p_ticks)
         }
         *p_ticks = ((uint64_t)chi<<32)|clo;
     } else {
-#ifdef CONFIG_CLOCK_SYS_DRIVER
+#if CONFIG_CLOCK_SYS_DRIVER
         struct timespec tp;
         if (!clock_gettime(CLOCK_MONOTONIC, &tp)) {
             *p_ticks = (uint64_t)tp.tv_sec*1000000000LL + tp.tv_nsec;
@@ -187,7 +187,7 @@ lr_errc_t clock_usleep(clock_hndl_t *p_hndl, uint32_t usec)
     if (p_hndl->drv==clock_drv_io) {
         bcm_usleep(p_hndl, usec, BCM_DEF_USLEEP_THRSHD);
     } else {
-#ifdef CONFIG_CLOCK_SYS_DRIVER
+#if CONFIG_CLOCK_SYS_DRIVER
         if (usleep(usec)) {
             err_printf("[%s] usleep() error %d; %s\n",
                 __func__, errno, strerror(errno));

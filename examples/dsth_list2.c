@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015,2016 Piotr Stolarz
+   Copyright (c) 2015,2016,2022 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -31,7 +31,7 @@
 
    NOTE1: Do not mix sensors of various powering mode (external vs parasite) on
    the same wire for this example (this is not the case for 'dsth_list' example).
-   NOTE2: The library need to be compiled with CONFIG_WRITE_PULLUP
+   NOTE2: The library need to be configured with CONFIG_WRITE_PULLUP
    to support parasite powering.
  */
 #undef PARASITE_POWER

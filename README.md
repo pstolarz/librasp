@@ -43,8 +43,8 @@ protocol.
    the library to fully support the parasite mode. Look in [`src/kernel`](src/kernel)
    directory for more info.
 
-2. Configure the library with `CONFIG_WRITE_PULLUP` parameter by updating
-   [`src/config.h`](src/config.h) while building the library.
+2. Configure the library with `CONFIG_WRITE_PULLUP` parameter while building
+   the library (see [`src/config.h`](src/config.h) header for details).
 
 3. RPi uses `w1-gpio` module as a 1-wire bus master driver. The driver needs
    to be configured to support bit-banged strong pull-up on the data wire,
