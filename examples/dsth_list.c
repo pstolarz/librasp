@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015,2016 Piotr Stolarz
+   Copyright (c) 2015,2016,2022 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -22,9 +22,8 @@
 #define MAX_MASTERS     32
 #define MAX_SLAVES      128
 
-/* define if want to set the temp. resolution for every DS sensor, e.g.
-#define SET_DSTH_RES    DSTH_RES_12BIT
- */
+/* define if want to set the temp. resolution for every DS sensor */
+//#define SET_DSTH_RES    DSTH_RES_12BIT
 
 int main(int argc, char **argv)
 {

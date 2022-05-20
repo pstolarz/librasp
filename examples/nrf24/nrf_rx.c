@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015,2016,2020 Piotr Stolarz
+   Copyright (c) 2015,2016,2020,2022 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -24,8 +24,8 @@
 
 #define CHANNEL     20
 
-/* GPIO pin where the nRF IRQ pin is connected, undef for no IRQ polling */
-/* #define GPIO_IRQ    22 */
+/* GPIO pin where the nRF IRQ pin is connected, if not defined - no IRQ polling */
+//#define GPIO_IRQ    22
 
 #define SPI_CS      0
 #define GPIO_CE     17

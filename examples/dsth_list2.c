@@ -27,14 +27,14 @@
 /* the example assumes common resolution for all probed sensors */
 #define DSTH_RES        DSTH_RES_12BIT
 
-/* define if sensors are powered parasitically
+/* Define if sensors are powered parasitically.
 
    NOTE1: Do not mix sensors of various powering mode (external vs parasite) on
    the same wire for this example (this is not the case for 'dsth_list' example).
    NOTE2: The library need to be configured with CONFIG_WRITE_PULLUP
    to support parasite powering.
  */
-#undef PARASITE_POWER
+//#define PARASITE_POWER
 
 
 int main(int argc, char **argv)

@@ -31,8 +31,7 @@
 # define CONFIG_WRITE_PULLUP 0
 #endif
 
-/*
- * If a parameter is defined w/o value assigned, it is assumed as configured.
+/* If a parameter is defined w/o value assigned, it is assumed as configured.
  */
 #define __XEXT1(__prm) (1##__prm)
 #define __EXT1(__prm) __XEXT1(__prm)
