@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2015,2016,2020 Piotr Stolarz
+   Copyright (c) 2015,2016,2020,2023 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -75,12 +75,12 @@ int main(void)
 
     NRF_EXEC(hal_nrf_set_operation_mode(HAL_NRF_PTX));
 
-    NRF_EXEC(hal_nrf_enable_continious_wave(true));
+    NRF_EXEC(hal_nrf_enable_continuous_wave(true));
     NRF_EXEC(hal_nrf_set_pll_mode(true));
     NRF_EXEC(hal_nrf_set_output_power(HAL_NRF_0DBM));
     NRF_EXEC(hal_nrf_set_rf_channel(CHANNEL));
 
-    assert(hal_nrf_is_continious_wave_enabled() &&
+    assert(hal_nrf_is_continuous_wave_enabled() &&
         hal_nrf_get_pll_mode() &&
         (hal_nrf_get_output_power()==HAL_NRF_0DBM) &&
         (hal_nrf_get_rf_channel()==CHANNEL));
@@ -93,7 +93,7 @@ int main(void)
 
     printf("RF carrier transmission stopped!\n");
 
-    hal_nrf_enable_continious_wave(false);
+    hal_nrf_enable_continuous_wave(false);
     hal_nrf_set_pll_mode(false);
 
 finish:

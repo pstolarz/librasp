@@ -9,7 +9,7 @@
  * the file.
  */
 /*
-   Copyright (c) 2015,2016,2020 Piotr Stolarz
+   Copyright (c) 2015,2016,2020,2023 Piotr Stolarz
    librasp: RPi HW interface library
 
    Distributed under the 2-clause BSD License (the License)
@@ -147,9 +147,12 @@ void hal_nrf_setup_dynamic_payload(uint8_t setup)
 }
 
 void hal_nrf_write_ack_payload(
-    uint8_t pipe, const uint8_t *tx_pload, uint8_t length)
+    hal_nrf_address_t pipe_num, const uint8_t *tx_pload, uint8_t length)
 {
-    hal_nrf_write_multibyte_reg(W_ACK_PAYLOAD | pipe, tx_pload, length);
+    if (pipe_num<=HAL_NRF_PIPE5) {
+        hal_nrf_write_multibyte_reg(
+            W_ACK_PAYLOAD | (uint8_t)pipe_num, tx_pload, length);
+    }
 }
 
 void hal_nrf_set_rf_channel(uint8_t channel)
@@ -267,14 +270,15 @@ uint16_t hal_nrf_get_auto_retr_delay(void)
     return (uint16_t)((((hal_nrf_read_reg(SETUP_RETR)>>4) & 0x0f)+1)*250);
 }
 
-void hal_nrf_set_rx_payload_width(uint8_t pipe_num, uint8_t pload_width)
+void hal_nrf_set_rx_payload_width(
+    hal_nrf_address_t pipe_num, uint8_t pload_width)
 {
-    hal_nrf_write_reg(RX_PW_P0+pipe_num, pload_width);
+    hal_nrf_write_reg(RX_PW_P0+(uint8_t)pipe_num, pload_width);
 }
 
-uint8_t hal_nrf_get_rx_payload_width(uint8_t pipe_num)
+uint8_t hal_nrf_get_rx_payload_width(hal_nrf_address_t pipe_num)
 {
-    return hal_nrf_read_reg(RX_PW_P0+pipe_num);
+    return hal_nrf_read_reg(RX_PW_P0+(uint8_t)pipe_num);
 }
 
 void hal_nrf_open_pipe(hal_nrf_address_t pipe_num, bool auto_ack)
@@ -365,7 +369,7 @@ finish:
     return;
 }
 
-uint8_t hal_nrf_get_pipe_status(uint8_t pipe_num)
+uint8_t hal_nrf_get_pipe_status(hal_nrf_address_t pipe_num)
 {
     uint8_t en_rxaddr, en_aa;
     uint8_t en_rx_r=0, en_aa_r=0;
@@ -374,7 +378,7 @@ uint8_t hal_nrf_get_pipe_status(uint8_t pipe_num)
     CHK_SPI_ERR();
     en_aa = hal_nrf_read_reg(EN_AA);
 
-    if (pipe_num<=5) {
+    if (pipe_num<=HAL_NRF_PIPE5) {
         en_rx_r = (en_rxaddr & (uint8_t)BIT((int)pipe_num)) !=0;
         en_aa_r = (en_aa & (uint8_t)BIT((int)pipe_num)) !=0;
     }
@@ -393,21 +397,21 @@ uint8_t hal_nrf_get_address_width(void)
     return (uint8_t)(hal_nrf_read_reg(SETUP_AW)+2);
 }
 
-void hal_nrf_set_address(const hal_nrf_address_t address, const uint8_t *addr)
+void hal_nrf_set_address(hal_nrf_address_t pipe_num, const uint8_t *addr)
 {
-    switch(address)
+    switch(pipe_num)
     {
     case HAL_NRF_TX:
     case HAL_NRF_PIPE0:
     case HAL_NRF_PIPE1:
         hal_nrf_write_multibyte_reg(W_REGISTER+RX_ADDR_P0+
-            (uint8_t)address, addr, hal_nrf_get_address_width());
+            (uint8_t)pipe_num, addr, hal_nrf_get_address_width());
       break;
     case HAL_NRF_PIPE2:
     case HAL_NRF_PIPE3:
     case HAL_NRF_PIPE4:
     case HAL_NRF_PIPE5:
-        hal_nrf_write_reg(RX_ADDR_P0 + (uint8_t)address, *addr);
+        hal_nrf_write_reg(RX_ADDR_P0 + (uint8_t)pipe_num, *addr);
         break;
 
     case HAL_NRF_ALL:
@@ -416,16 +420,16 @@ void hal_nrf_set_address(const hal_nrf_address_t address, const uint8_t *addr)
     }
 }
 
-uint8_t hal_nrf_get_address(uint8_t address, uint8_t *addr)
+uint8_t hal_nrf_get_address(hal_nrf_address_t pipe_num, uint8_t *addr)
 {
-    switch (address)
+    switch (pipe_num)
     {
     case HAL_NRF_PIPE0:
     case HAL_NRF_PIPE1:
     case HAL_NRF_TX:
-        return (uint8_t)hal_nrf_read_multibyte_reg(address, addr, 0);
+        return (uint8_t)hal_nrf_read_multibyte_reg(pipe_num, addr, 0);
     default:
-        *addr = hal_nrf_read_reg(RX_ADDR_P0 + address);
+        *addr = hal_nrf_read_reg(RX_ADDR_P0 + pipe_num);
         return 1;
     }
 }
@@ -441,7 +445,7 @@ void hal_nrf_config_rx_pipe(hal_nrf_address_t pipe_num,
         CHK_SPI_ERR();
     }
 
-    hal_nrf_set_rx_payload_width((uint8_t)pipe_num, pload_width);
+    hal_nrf_set_rx_payload_width(pipe_num, pload_width);
 finish:
     return;
 }
@@ -713,7 +717,7 @@ bool hal_nrf_get_pll_mode(void)
     return ((hal_nrf_read_reg(RF_SETUP) & (uint8_t)BIT(PLL_LOCK)) != 0);
 }
 
-void hal_nrf_enable_continious_wave(bool enable)
+void hal_nrf_enable_continuous_wave(bool enable)
 {
     uint8_t rf_setup = hal_nrf_read_reg(RF_SETUP);
     CHK_SPI_ERR();
@@ -728,7 +732,7 @@ finish:
     return;
 }
 
-bool hal_nrf_is_continious_wave_enabled(void)
+bool hal_nrf_is_continuous_wave_enabled(void)
 {
     return ((hal_nrf_read_reg(RF_SETUP) & (uint8_t)BIT(CONT_WAVE)) != 0);
 }
