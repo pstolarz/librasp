@@ -16,7 +16,7 @@
 #include "librasp/common.h"
 
 #ifdef __cplusplus
-{
+extern "C" {
 #endif
 
 #define SPI_USE_DEF     -1
